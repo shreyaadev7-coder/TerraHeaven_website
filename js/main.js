@@ -2361,6 +2361,9 @@ if (cartItems) {
         document.body.classList.remove(
             "modal-open"
         );
+       if (lenis) {
+    lenis.start();
+}
     }
 
 
