@@ -489,3 +489,63 @@ body {
 #cart-items::-webkit-scrollbar-track {
     background: #E8E5DF;
 }
+/* =========================================================
+   MODAL / INTERNAL SCROLL FIX
+   ========================================================= */
+
+.category-modal-panel,
+.product-modal-panel,
+#cart-items {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+
+/*
+ * The category and product popups should receive
+ * their own mouse-wheel / touchpad scrolling.
+ */
+
+.category-modal-panel,
+.product-modal-panel {
+    touch-action: pan-y;
+}
+
+
+/*
+ * Prevent the popup from visually moving with
+ * the background page.
+ */
+
+#category-modal,
+#product-modal,
+#cart-drawer {
+    overscroll-behavior: contain;
+}
+
+
+/*
+ * Keep the collection panel scrollable.
+ */
+
+.category-modal-panel {
+    overflow-y: auto;
+}
+
+
+/*
+ * Product details can also scroll independently.
+ */
+
+.product-modal-panel {
+    overflow-y: auto;
+}
+
+
+/*
+ * Cart items scroll independently.
+ */
+
+#cart-items {
+    overflow-y: auto;
+}
