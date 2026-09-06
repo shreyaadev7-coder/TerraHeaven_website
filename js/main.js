@@ -1173,15 +1173,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             );
         }
+productModal.classList.remove(
+    "hidden"
+);
 
+document.body.classList.add(
+    "modal-open"
+);
 
-        productModal.classList.remove(
-            "hidden"
-        );
+if (lenis) {
+    lenis.stop();
+}
 
+const productPanel =
+    productModal.querySelector(
+        ".product-modal-panel"
+    );
 
-        document.body.classList.add(
-            "modal-open"
+if (productPanel) {
+    productPanel.setAttribute(
+        "data-lenis-prevent",
+        ""
+    );
+}
         );
 
 
