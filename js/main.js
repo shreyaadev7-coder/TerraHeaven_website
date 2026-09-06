@@ -2328,7 +2328,21 @@ if (lenis) {
         document.body.classList.add(
             "modal-open"
         );
+if (lenis) {
+    lenis.stop();
+}
 
+const cartItems =
+    document.getElementById(
+        "cart-items"
+    );
+
+if (cartItems) {
+    cartItems.setAttribute(
+        "data-lenis-prevent",
+        ""
+    );
+}
 
         renderCart();
     }
