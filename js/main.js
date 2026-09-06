@@ -1,16 +1,8 @@
 /* =========================================================
    TERRA HAVEN
    MAIN JAVASCRIPT
-   =========================================================
-   - Normal vertical page scrolling
-   - Working horizontal category scroller
-   - Touchpad / mouse wheel support
-   - Product galleries
-   - Product variants
-   - Add to cart
-   - Cart drawer
-   - Popup internal scrolling
-   - GSAP visual animations
+   Product System + Product Gallery + Cart
+   Horizontal Category Scroll
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -19,23 +11,89 @@ document.addEventListener("DOMContentLoaded", () => {
        1. LOADER
        ===================================================== */
 
-    const loader = document.getElementById("loader");
-
     window.addEventListener("load", () => {
+        const loader = document.getElementById("loader");
 
-        if (!loader) return;
+        if (loader) {
+            loader.style.opacity = "0";
 
-        loader.style.opacity = "0";
-
-        setTimeout(() => {
-            loader.style.visibility = "hidden";
-            loader.style.pointerEvents = "none";
-        }, 1000);
+            setTimeout(() => {
+                loader.style.visibility = "hidden";
+                loader.style.pointerEvents = "none";
+            }, 1000);
+        }
     });
 
 
     /* =====================================================
-       2. GSAP SETUP
+       2. LENIS SMOOTH SCROLL
+       ===================================================== */
+
+    let lenis = null;
+
+    if (typeof Lenis !== "undefined") {
+
+        lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) =>
+                Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: "vertical",
+            gestureDirection: "vertical",
+            smooth: true
+        });
+
+        if (typeof ScrollTrigger !== "undefined") {
+            lenis.on("scroll", ScrollTrigger.update);
+        }
+
+        if (typeof gsap !== "undefined") {
+            gsap.ticker.add((time) => {
+                lenis.raf(time * 1000);
+            });
+
+            gsap.ticker.lagSmoothing(0);
+        }
+    }
+
+
+    /* =====================================================
+       3. GSAP
+       ===================================================== */
+
+    if (
+        typeof gsap !== "undefined" &&
+        typeof ScrollTrigger !== "undefined"
+    ) {
+        gsap.registerPlugin(ScrollTrigger);
+    }
+
+
+    /* =====================================================
+       4. HERO PARALLAX
+       ===================================================== */
+
+    if (
+        typeof gsap !== "undefined" &&
+        typeof ScrollTrigger !== "undefined" &&
+        document.querySelector("#hero-bg")
+    ) {
+
+        gsap.to("#hero-bg", {
+            yPercent: 30,
+            ease: "none",
+
+            scrollTrigger: {
+                trigger: "#hero-bg",
+                start: "top top",
+                end: "bottom top",
+                scrub: true
+            }
+        });
+    }
+
+
+    /* =====================================================
+       5. PHILOSOPHY REVEAL
        ===================================================== */
 
     if (
@@ -43,34 +101,12 @@ document.addEventListener("DOMContentLoaded", () => {
         typeof ScrollTrigger !== "undefined"
     ) {
 
-        gsap.registerPlugin(ScrollTrigger);
-
-
-        /* HERO */
-
-        const heroBg =
-            document.getElementById("hero-bg");
-
-        if (heroBg) {
-
-            gsap.to(heroBg, {
-                yPercent: 30,
-                ease: "none",
-
-                scrollTrigger: {
-                    trigger: heroBg,
-                    start: "top top",
-                    end: "bottom top",
-                    scrub: true
-                }
-            });
-        }
-
-
-        /* PHILOSOPHY IMAGE */
-
         const revealImage =
             document.querySelector(".reveal-image");
+
+        const revealText =
+            document.querySelector(".reveal-text");
+
 
         if (revealImage) {
 
@@ -85,14 +121,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 opacity: 0,
                 duration: 1.2,
                 ease: "power3.out"
+
             });
         }
 
-
-        /* PHILOSOPHY TEXT */
-
-        const revealText =
-            document.querySelector(".reveal-text");
 
         if (revealText) {
 
@@ -108,81 +140,62 @@ document.addEventListener("DOMContentLoaded", () => {
                 duration: 1.2,
                 stagger: 0.2,
                 ease: "power3.out"
-            });
-        }
 
-
-        /* PARALLAX BANNER */
-
-        const parallaxBanner =
-            document.getElementById(
-                "parallax-banner"
-            );
-
-        if (parallaxBanner) {
-
-            gsap.to(parallaxBanner, {
-
-                yPercent: 20,
-                ease: "none",
-
-                scrollTrigger: {
-                    trigger: parallaxBanner,
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: true
-                }
             });
         }
     }
 
 
     /* =====================================================
-       3. HORIZONTAL CATEGORY SCROLLER
+       6. HORIZONTAL CATEGORY SCROLL
        =====================================================
 
-       IMPORTANT:
+       This replaces the old GSAP horizontal pin.
 
-       We are NOT using Lenis here.
-
-       The browser keeps normal vertical scrolling.
-
-       When the pointer is over the category section,
-       wheel / touchpad movement becomes horizontal.
-
-       At the beginning/end, normal page scrolling resumes.
+       It works with:
+       - Mouse wheel
+       - Touchpad vertical swipe
+       - Touchpad horizontal swipe
+       - Mouse drag
+       - Touch screens
     */
 
     const horizontalSection =
-        document.getElementById(
-            "horizontal-scroll"
-        );
+        document.getElementById("horizontal-scroll");
 
     const horizontalTrack =
-        document.getElementById(
-            "horizontal-track"
-        );
+        document.getElementById("horizontal-track");
 
 
-    if (
-        horizontalSection &&
-        horizontalTrack
-    ) {
+    if (horizontalSection && horizontalTrack) {
 
         let currentX = 0;
-
         let targetX = 0;
-
         let maxX = 0;
 
         let pointerInside = false;
+        let dragging = false;
+
+        let dragStartX = 0;
+        let dragStartPosition = 0;
 
 
-        /* -------------------------------------------------
-           Calculate width
-           ------------------------------------------------- */
+        /*
+         * Tell Lenis that this section handles its
+         * own scrolling interaction.
+         */
 
-        function calculateHorizontalWidth() {
+        horizontalSection.setAttribute(
+            "data-lenis-prevent",
+            ""
+        );
+
+
+        /*
+         * Calculate available horizontal distance.
+         */
+
+        function calculateHorizontalDistance() {
 
             maxX =
                 Math.max(
@@ -217,28 +230,24 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /* -------------------------------------------------
-           Smooth movement
-           ------------------------------------------------- */
+        /*
+         * Smoothly move towards target.
+         */
 
         function animateHorizontal() {
 
             const difference =
-                targetX -
-                currentX;
+                targetX - currentX;
 
 
-            if (
-                Math.abs(difference) <
-                0.5
-            ) {
+            if (Math.abs(difference) < 0.1) {
 
                 currentX = targetX;
 
             } else {
 
                 currentX +=
-                    difference * 0.14;
+                    difference * 0.12;
             }
 
 
@@ -252,35 +261,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /* -------------------------------------------------
-           Mouse enters section
-           ------------------------------------------------- */
+        /*
+         * Mouse entered section.
+         */
 
         horizontalSection.addEventListener(
             "mouseenter",
             () => {
-
                 pointerInside = true;
             }
         );
 
 
-        /* -------------------------------------------------
-           Mouse leaves section
-           ------------------------------------------------- */
+        /*
+         * Mouse left section.
+         */
 
         horizontalSection.addEventListener(
             "mouseleave",
             () => {
-
                 pointerInside = false;
             }
         );
 
 
-        /* -------------------------------------------------
-           Mouse wheel / touchpad
-           ------------------------------------------------- */
+        /*
+         * Wheel / touchpad.
+         */
 
         horizontalSection.addEventListener(
             "wheel",
@@ -292,13 +299,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * Trackpads may send:
-                 *
-                 * deltaY = vertical swipe
-                 * deltaX = horizontal swipe
-                 *
-                 * Both are converted into horizontal
-                 * category movement.
+                 * Combine vertical and horizontal
+                 * touchpad movement.
                  */
 
                 let movement =
@@ -307,7 +309,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                 * Avoid extreme jumps.
+                 * Make scrolling feel natural but
+                 * prevent huge jumps.
                  */
 
                 movement =
@@ -320,15 +323,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
 
 
-                const atStart =
-                    targetX <= 0;
-
-
-                const atEnd =
-                    targetX >=
-                    maxX;
-
-
                 const movingForward =
                     movement > 0;
 
@@ -337,18 +331,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     movement < 0;
 
 
+                const atBeginning =
+                    targetX <= 0;
+
+
+                const atEnd =
+                    targetX >= maxX - 1;
+
+
                 /*
-                 * Consume the touchpad gesture only
-                 * while horizontal content remains.
+                 * If there is still horizontal content,
+                 * consume the scroll.
                  */
 
                 if (
                     (movingForward && !atEnd) ||
-                    (movingBackward && !atStart)
+                    (movingBackward && !atBeginning)
                 ) {
 
                     event.preventDefault();
-
                     event.stopPropagation();
 
 
@@ -356,8 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         Math.max(
                             0,
                             Math.min(
-                                targetX +
-                                movement,
+                                targetX + movement,
                                 maxX
                             )
                         );
@@ -370,34 +370,13 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /* -------------------------------------------------
-           Mouse drag
-           ------------------------------------------------- */
-
-        let dragging = false;
-
-        let dragStartX = 0;
-
-        let dragStartPosition = 0;
-
+        /*
+         * Mouse drag.
+         */
 
         horizontalTrack.addEventListener(
             "mousedown",
             (event) => {
-
-                /*
-                 * Don't start dragging if user clicked
-                 * a button or another interactive item.
-                 */
-
-                if (
-                    event.target.closest(
-                        "button, a"
-                    )
-                ) {
-                    return;
-                }
-
 
                 dragging = true;
 
@@ -421,7 +400,9 @@ document.addEventListener("DOMContentLoaded", () => {
             "mousemove",
             (event) => {
 
-                if (!dragging) return;
+                if (!dragging) {
+                    return;
+                }
 
 
                 const distance =
@@ -446,11 +427,12 @@ document.addEventListener("DOMContentLoaded", () => {
             "mouseup",
             () => {
 
-                if (!dragging) return;
+                if (!dragging) {
+                    return;
+                }
 
 
                 dragging = false;
-
 
                 horizontalTrack.style.cursor =
                     "grab";
@@ -458,12 +440,11 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /* -------------------------------------------------
-           Touch screen support
-           ------------------------------------------------- */
+        /*
+         * Touch screen swipe.
+         */
 
         let lastTouchX = 0;
-
         let lastTouchY = 0;
 
 
@@ -505,11 +486,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     touch.clientY;
 
 
-                /*
-                 * Use whichever direction has the
-                 * stronger movement.
-                 */
-
                 const movement =
                     Math.abs(deltaX) >
                     Math.abs(deltaY)
@@ -517,7 +493,15 @@ document.addEventListener("DOMContentLoaded", () => {
                         : deltaY;
 
 
-                const atStart =
+                const movingForward =
+                    movement > 0;
+
+
+                const movingBackward =
+                    movement < 0;
+
+
+                const atBeginning =
                     targetX <= 0;
 
 
@@ -526,8 +510,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 if (
-                    (movement > 0 && !atEnd) ||
-                    (movement < 0 && !atStart)
+                    (movingForward && !atEnd) ||
+                    (movingBackward && !atBeginning)
                 ) {
 
                     event.preventDefault();
@@ -538,7 +522,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             0,
                             Math.min(
                                 targetX +
-                                movement,
+                                movement *
+                                1.2,
                                 maxX
                             )
                         );
@@ -557,306 +542,76 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /* -------------------------------------------------
-           Resize
-           ------------------------------------------------- */
+        /*
+         * Keep dimensions correct after resize.
+         */
 
         window.addEventListener(
             "resize",
-            calculateHorizontalWidth
+            calculateHorizontalDistance
         );
 
 
-        /* -------------------------------------------------
-           Start
-           ------------------------------------------------- */
-
-        setTimeout(
-            calculateHorizontalWidth,
-            100
-        );
-
+        /*
+         * Wait for all images.
+         */
 
         window.addEventListener(
             "load",
-            calculateHorizontalWidth
+            calculateHorizontalDistance
         );
 
 
+        setTimeout(
+            calculateHorizontalDistance,
+            300
+        );
+
+
+        /*
+         * Start smooth horizontal movement.
+         */
+
         animateHorizontal();
-
-
-        horizontalTrack.style.cursor =
-            "grab";
     }
 
 
     /* =====================================================
-       4. PRODUCT DATABASE
+       7. PARALLAX BANNER
+       ===================================================== */
+
+    if (
+        typeof gsap !== "undefined" &&
+        typeof ScrollTrigger !== "undefined" &&
+        document.querySelector("#parallax-banner")
+    ) {
+
+        gsap.to("#parallax-banner", {
+
+            yPercent: 20,
+
+            ease: "none",
+
+            scrollTrigger: {
+                trigger: "#parallax-banner",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true
+            }
+
+        });
+    }
+
+
+    /* =====================================================
+       8. PRODUCT DATABASE
        ===================================================== */
 
     const products = [
 
-        /* =================================================
+        /* -------------------------
            BEDSPREADS
-           ================================================= */
-
-        {
-            id: "bedspread-1",
-            category: "Bedspreads",
-            name: "Terra Haven Bedspread 01",
-
-            description:
-                "A timeless bedspread designed to bring warmth and character into your bedroom.",
-
-            images: [
-                "assets/images/bedspread-1.png"
-            ],
-
-            price: 2499,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single",
-                        "Double",
-                        "Queen",
-                        "King"
-                    ]
-                }
-            ]
-        },
-
-
-        {
-            id: "bedspread-2",
-            category: "Bedspreads",
-            name: "Terra Haven Bedspread 02",
-
-            images: [
-                "assets/images/bedspread-2.png"
-            ],
-
-            price: 2599,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single",
-                        "Double",
-                        "Queen",
-                        "King"
-                    ]
-                }
-            ]
-        },
-
-
-        {
-            id: "bedspread-3",
-            category: "Bedspreads",
-            name: "Terra Haven Bedspread 03",
-
-            images: [
-                "assets/images/bedspread-3.png"
-            ],
-
-            price: 2699,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single",
-                        "Double",
-                        "Queen",
-                        "King"
-                    ]
-                }
-            ]
-        },
-
-
-        {
-            id: "bedspread-4",
-            category: "Bedspreads",
-            name: "Terra Haven Bedspread 04",
-
-            images: [
-                "assets/images/bedspread-4.png"
-            ],
-
-            price: 2799,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single",
-                        "Double",
-                        "Queen",
-                        "King"
-                    ]
-                }
-            ]
-        },
-
-
-        {
-            id: "bedspread-5",
-            category: "Bedspreads",
-            name: "Terra Haven Bedspread 05",
-
-            images: [
-                "assets/images/bedspread-5.png"
-            ],
-
-            price: 2899,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single",
-                        "Double",
-                        "Queen",
-                        "King"
-                    ]
-                }
-            ]
-        },
-
-
-        {
-            id: "bedspread-6",
-            category: "Bedspreads",
-            name: "Terra Haven Bedspread 06",
-
-            images: [
-                "assets/images/bedspread-6.png"
-            ],
-
-            price: 2999,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single",
-                        "Double",
-                        "Queen",
-                        "King"
-                    ]
-                }
-            ]
-        },
-
-
-        {
-            id: "bedspread-7",
-            category: "Bedspreads",
-            name: "Terra Haven Bedspread 07",
-
-            images: [
-                "assets/images/bedspread-7.png"
-            ],
-
-            price: 3099,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single",
-                        "Double",
-                        "Queen",
-                        "King"
-                    ]
-                }
-            ]
-        },
-
-
-        {
-            id: "bedspread-8",
-            category: "Bedspreads",
-            name: "Terra Haven Bedspread 08",
-
-            images: [
-                "assets/images/bedspread-8.png"
-            ],
-
-            price: 3199,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single",
-                        "Double",
-                        "Queen",
-                        "King"
-                    ]
-                }
-            ]
-        },
-
-
-        {
-            id: "bedspread-9",
-            category: "Bedspreads",
-            name: "Terra Haven Bedspread 09",
-
-            images: [
-                "assets/images/bedspread-9.png"
-            ],
-
-            price: 3299,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single",
-                        "Double",
-                        "Queen",
-                        "King"
-                    ]
-                }
-            ]
-        },
-
-
-        {
-            id: "bedspread-10",
-            category: "Bedspreads",
-            name: "Terra Haven Bedspread 10",
-
-            images: [
-                "assets/images/bedspread-10.png"
-            ],
-
-            price: 3399,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single",
-                        "Double",
-                        "Queen",
-                        "King"
-                    ]
-                }
-            ]
-        },
-
-
-        /* =================================================
-           DOUBLE BED
-           ================================================= */
+           ------------------------- */
 
         {
             id: "double-bed-1",
@@ -864,7 +619,7 @@ document.addEventListener("DOMContentLoaded", () => {
             name: "Double Bed Collection",
 
             description:
-                "A complete double-bed collection with multiple views.",
+                "A warm, timeless textile designed to bring softness and character into your bedroom.",
 
             images: [
                 "assets/images/Bed Double 1A.png",
@@ -887,14 +642,13 @@ document.addEventListener("DOMContentLoaded", () => {
         },
 
 
-        /* =================================================
-           SINGLE BED
-           ================================================= */
-
         {
             id: "single-bed-1",
             category: "Bedspreads",
             name: "Single Bed Collection",
+
+            description:
+                "A soft everyday bed layer with an understated Terra Haven finish.",
 
             images: [
                 "assets/images/Single BS1.png",
@@ -914,9 +668,9 @@ document.addEventListener("DOMContentLoaded", () => {
         },
 
 
-        /* =================================================
+        /* -------------------------
            CUSHIONS
-           ================================================= */
+           ------------------------- */
 
         {
             id: "cushion-1",
@@ -941,7 +695,7 @@ document.addEventListener("DOMContentLoaded", () => {
             name: "Terra Cushion 02",
 
             description:
-                "An earthy statement cushion for relaxed interiors.",
+                "An earthy statement cushion for relaxed and layered interiors.",
 
             images: [
                 "assets/images/cushion 2.jpeg",
@@ -957,6 +711,9 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Cushions",
             name: "Terra Cushion 03",
 
+            description:
+                "A refined cushion designed to complement natural interiors.",
+
             images: [
                 "assets/images/cushion 3.jpeg"
             ],
@@ -969,6 +726,9 @@ document.addEventListener("DOMContentLoaded", () => {
             id: "cushion-4",
             category: "Cushions",
             name: "Terra Cushion 04",
+
+            description:
+                "A subtle decorative layer inspired by natural tones.",
 
             images: [
                 "assets/images/cushion 4.jpeg"
@@ -983,6 +743,9 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Cushions",
             name: "Terra Cushion 05",
 
+            description:
+                "A soft textured cushion made for calm, inviting spaces.",
+
             images: [
                 "assets/images/cushion 5.jpeg",
                 "assets/images/cushion 5A.jpeg"
@@ -992,14 +755,17 @@ document.addEventListener("DOMContentLoaded", () => {
         },
 
 
-        /* =================================================
-           LIFESTYLE BAGS
-           ================================================= */
+        /* -------------------------
+           BAGS
+           ------------------------- */
 
         {
             id: "bag-3",
             category: "Lifestyle Bags",
             name: "Terra Everyday Bag",
+
+            description:
+                "An everyday lifestyle bag balancing simplicity, utility and natural character.",
 
             images: [
                 "assets/images/Bag 3A.png",
@@ -1014,6 +780,9 @@ document.addEventListener("DOMContentLoaded", () => {
             id: "tote-1",
             category: "Lifestyle Bags",
             name: "The Haven Linen Tote",
+
+            description:
+                "A relaxed, versatile tote for everyday use.",
 
             images: [
                 "assets/images/Tote 1B.jpeg",
@@ -1035,14 +804,17 @@ document.addEventListener("DOMContentLoaded", () => {
         },
 
 
-        /* =================================================
+        /* -------------------------
            OILS
-           ================================================= */
+           ------------------------- */
 
         {
             id: "oil-sesame",
             category: "Edible Cold-Pressed Oils",
             name: "Cold-Pressed Sesame Oil",
+
+            description:
+                "A traditionally inspired cold-pressed oil for everyday cooking.",
 
             images: [
                 "assets/images/oil-sesame.png"
@@ -1067,6 +839,9 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Edible Cold-Pressed Oils",
             name: "Cold-Pressed Groundnut Oil",
 
+            description:
+                "A naturally sourced cold-pressed oil for everyday kitchen use.",
+
             images: [
                 "assets/images/oil-groundnut.png"
             ],
@@ -1090,6 +865,9 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Edible Cold-Pressed Oils",
             name: "Cold-Pressed Coconut Oil",
 
+            description:
+                "A versatile cold-pressed coconut oil from the Terra Haven collection.",
+
             images: [
                 "assets/images/oil-coconut.png"
             ],
@@ -1108,14 +886,17 @@ document.addEventListener("DOMContentLoaded", () => {
         },
 
 
-        /* =================================================
+        /* -------------------------
            QUILTS
-           ================================================= */
+           ------------------------- */
 
         {
             id: "quilt-1",
             category: "Quilts",
             name: "Terra Quilt 01",
+
+            description:
+                "A comfortable quilt designed for warm, relaxed interiors.",
 
             images: [
                 "assets/images/quilt-1.png"
@@ -1129,6 +910,9 @@ document.addEventListener("DOMContentLoaded", () => {
             id: "quilt-2",
             category: "Quilts",
             name: "Terra Quilt 02",
+
+            description:
+                "A layered quilt with an earthy, understated aesthetic.",
 
             images: [
                 "assets/images/quilt-2.png",
@@ -1144,6 +928,9 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Quilts",
             name: "Terra Quilt 03",
 
+            description:
+                "A tactile quilt designed to bring comfort and character home.",
+
             images: [
                 "assets/images/quilt-3.png",
                 "assets/images/quilt-3b.png"
@@ -1158,6 +945,9 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Quilts",
             name: "Terra Quilt 04",
 
+            description:
+                "A timeless quilt inspired by natural textures.",
+
             images: [
                 "assets/images/quilt-4.png",
                 "assets/images/quilt-4b.png"
@@ -1170,7 +960,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       5. CART STATE
+       9. PRODUCT / CART STATE
        ===================================================== */
 
     let cart = [];
@@ -1179,13 +969,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let currentImageIndex = 0;
 
-    let currentQuantity = 1;
-
     let currentSelections = {};
+
+    let currentQuantity = 1;
 
 
     /* =====================================================
-       6. HELPERS
+       10. HELPERS
        ===================================================== */
 
     function formatPrice(price) {
@@ -1209,7 +999,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       7. PRODUCT CARD
+       11. PRODUCT CARD
        ===================================================== */
 
     function createProductCard(product) {
@@ -1257,7 +1047,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             </div>
 
-
             <div class="mt-4 text-center">
 
                 <span class="text-[10px] uppercase tracking-[0.25em] text-clay block mb-2">
@@ -1290,9 +1079,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         card.addEventListener(
             "click",
-            () => {
-                openProductModal(product);
-            }
+            () => openProductModal(product)
         );
 
 
@@ -1301,7 +1088,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       8. FEATURED PRODUCTS
+       12. FEATURED PRODUCTS
        ===================================================== */
 
     const productGrid =
@@ -1317,11 +1104,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         productGrid.innerHTML = "";
 
-
-        /*
-         * Show first 6 products on homepage.
-         * "Shop All Products" shows everything.
-         */
 
         products
             .slice(0, 6)
@@ -1339,7 +1121,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       9. PRODUCT MODAL
+       13. PRODUCT MODAL
        ===================================================== */
 
     const productModal =
@@ -1354,70 +1136,12 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-    function lockBackground() {
-
-        document.body.classList.add(
-            "modal-open"
-        );
-    }
-
-
-    function unlockBackground() {
-
-        /*
-         * Only unlock when no modal/drawer is open.
-         */
-
-        const categoryOpen =
-            document
-                .getElementById(
-                    "category-modal"
-                )
-                ?.classList.contains(
-                    "hidden"
-                ) === false;
-
-
-        const productOpen =
-            document
-                .getElementById(
-                    "product-modal"
-                )
-                ?.classList.contains(
-                    "hidden"
-                ) === false;
-
-
-        const cartOpen =
-            document
-                .getElementById(
-                    "cart-drawer"
-                )
-                ?.classList.contains(
-                    "hidden"
-                ) === false;
-
-
-        if (
-            !categoryOpen &&
-            !productOpen &&
-            !cartOpen
-        ) {
-
-            document.body.classList.remove(
-                "modal-open"
-            );
-        }
-    }
-
-
     function openProductModal(product) {
 
         if (
             !productModal ||
             !productModalContent
         ) {
-
             return;
         }
 
@@ -1433,10 +1157,6 @@ document.addEventListener("DOMContentLoaded", () => {
         currentSelections = {};
 
 
-        /*
-         * Automatically select first variant.
-         */
-
         if (product.options) {
 
             product.options.forEach(
@@ -1449,9 +1169,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         currentSelections[index] =
                             option.values[0];
-
                     }
-
                 }
             );
         }
@@ -1462,7 +1180,9 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        lockBackground();
+        document.body.classList.add(
+            "modal-open"
+        );
 
 
         renderProductModal();
@@ -1479,7 +1199,9 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        unlockBackground();
+        document.body.classList.remove(
+            "modal-open"
+        );
     }
 
 
@@ -1489,7 +1211,6 @@ document.addEventListener("DOMContentLoaded", () => {
             !currentProduct ||
             !productModalContent
         ) {
-
             return;
         }
 
@@ -1498,7 +1219,7 @@ document.addEventListener("DOMContentLoaded", () => {
             currentProduct;
 
 
-        const selectedImage =
+        const image =
             product.images[
                 currentImageIndex
             ];
@@ -1506,16 +1227,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         productModalContent.innerHTML = `
 
+            <!-- GALLERY -->
+
             <div class="product-detail-gallery">
 
                 <div class="product-large-image">
 
                     <img
-                        src="${selectedImage}"
+                        src="${image}"
                         alt="${escapeHtml(product.name)}"
                         id="modal-main-image"
                     >
-
 
                     ${
                         product.images.length > 1
@@ -1524,16 +1246,14 @@ document.addEventListener("DOMContentLoaded", () => {
                         <button
                             type="button"
                             id="product-prev"
-                            class="gallery-arrow gallery-arrow-left"
-                            aria-label="Previous image">
+                            class="gallery-arrow gallery-arrow-left">
                             ←
                         </button>
 
                         <button
                             type="button"
                             id="product-next"
-                            class="gallery-arrow gallery-arrow-right"
-                            aria-label="Next image">
+                            class="gallery-arrow gallery-arrow-right">
                             →
                         </button>
                         `
@@ -1553,11 +1273,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         ${
                             product.images
                                 .map(
-                                    (
-                                        imageUrl,
-                                        index
-                                    ) => `
-
+                                    (imageUrl, index) => `
                                         <button
                                             type="button"
                                             class="product-thumbnail ${
@@ -1587,46 +1303,30 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
 
+            <!-- INFORMATION -->
+
             <div class="product-detail-info">
 
-                <span
-                    class="text-xs uppercase tracking-[0.3em] text-clay">
-
-                    ${escapeHtml(
-                        product.category
-                    )}
-
+                <span class="text-xs uppercase tracking-[0.3em] text-clay">
+                    ${escapeHtml(product.category)}
                 </span>
 
 
-                <h2
-                    class="font-serif text-4xl md:text-5xl text-charcoal mt-3">
-
-                    ${escapeHtml(
-                        product.name
-                    )}
-
+                <h2 class="font-serif text-4xl md:text-5xl text-charcoal mt-3">
+                    ${escapeHtml(product.name)}
                 </h2>
 
 
-                <div
-                    class="mt-5 text-2xl font-medium text-charcoal">
-
-                    ${formatPrice(
-                        product.price
-                    )}
-
+                <div class="mt-5 text-2xl font-medium text-charcoal">
+                    ${formatPrice(product.price)}
                 </div>
 
 
-                <p
-                    class="text-sm text-charcoal/60 leading-relaxed mt-6">
-
+                <p class="text-sm text-charcoal/60 leading-relaxed mt-6">
                     ${escapeHtml(
                         product.description ||
                         "Thoughtfully selected for the Terra Haven collection."
                     )}
-
                 </p>
 
 
@@ -1635,26 +1335,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     ?
                     product.options
                         .map(
-                            (
-                                option,
-                                optionIndex
-                            ) => `
+                            (option, optionIndex) => `
 
-                                <div
-                                    class="mt-8">
+                                <div class="mt-8">
 
-                                    <label
-                                        class="text-xs uppercase tracking-widest text-charcoal font-medium block mb-3">
-
-                                        ${escapeHtml(
-                                            option.label
-                                        )}
-
+                                    <label class="text-xs uppercase tracking-widest text-charcoal font-medium block mb-3">
+                                        ${escapeHtml(option.label)}
                                     </label>
 
-
-                                    <div
-                                        class="flex flex-wrap gap-2">
+                                    <div class="flex flex-wrap gap-2">
 
                                         ${
                                             option.values
@@ -1664,18 +1353,14 @@ document.addEventListener("DOMContentLoaded", () => {
                                                         <button
                                                             type="button"
                                                             class="option-button ${
-                                                                currentSelections[
-                                                                    optionIndex
-                                                                ] === value
+                                                                currentSelections[optionIndex] === value
                                                                     ? "selected"
                                                                     : ""
                                                             }"
                                                             data-option="${optionIndex}"
                                                             data-value="${escapeHtml(value)}">
 
-                                                            ${escapeHtml(
-                                                                value
-                                                            )}
+                                                            ${escapeHtml(value)}
 
                                                         </button>
                                                     `
@@ -1686,6 +1371,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                     </div>
 
                                 </div>
+
                             `
                         )
                         .join("")
@@ -1696,39 +1382,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <div class="mt-8">
 
-                    <label
-                        class="text-xs uppercase tracking-widest text-charcoal font-medium block mb-3">
-
+                    <label class="text-xs uppercase tracking-widest text-charcoal font-medium block mb-3">
                         Quantity
-
                     </label>
-
 
                     <div class="quantity-control">
 
                         <button
                             type="button"
                             id="quantity-minus">
-
                             −
-
                         </button>
 
-
-                        <span
-                            id="product-quantity">
-
+                        <span id="product-quantity">
                             ${currentQuantity}
-
                         </span>
-
 
                         <button
                             type="button"
                             id="quantity-plus">
-
                             +
-
                         </button>
 
                     </div>
@@ -1741,14 +1414,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     id="modal-add-to-cart"
                     class="w-full mt-8 bg-charcoal text-white py-4 text-xs uppercase tracking-[0.2em] hover:bg-clay transition-colors">
 
-                    Add to Cart —
-                    ${formatPrice(product.price)}
+                    Add to Cart — ${formatPrice(product.price)}
 
                 </button>
 
 
-                <div
-                    class="mt-5 text-xs text-charcoal/50 leading-relaxed">
+                <div class="mt-5 text-xs text-charcoal/50 leading-relaxed">
 
                     ✓ Carefully selected for Terra Haven<br>
                     ✓ Multiple variants available<br>
@@ -1760,15 +1431,15 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
 
-        attachProductEvents();
+        setupProductModalEvents();
     }
 
 
     /* =====================================================
-       10. PRODUCT EVENTS
+       14. PRODUCT MODAL CONTROLS
        ===================================================== */
 
-    function attachProductEvents() {
+    function setupProductModalEvents() {
 
         if (!currentProduct) return;
 
@@ -1778,9 +1449,7 @@ document.addEventListener("DOMContentLoaded", () => {
          */
 
         document
-            .querySelectorAll(
-                ".product-thumbnail"
-            )
+            .querySelectorAll(".product-thumbnail")
             .forEach(button => {
 
                 button.addEventListener(
@@ -1795,20 +1464,19 @@ document.addEventListener("DOMContentLoaded", () => {
                         renderProductModal();
                     }
                 );
+
             });
 
 
         /*
-         * Previous
+         * Previous image
          */
 
         document
-            .getElementById(
-                "product-prev"
-            )
+            .getElementById("product-prev")
             ?.addEventListener(
                 "click",
-                event => {
+                (event) => {
 
                     event.stopPropagation();
 
@@ -1817,14 +1485,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                     if (
-                        currentImageIndex <
-                        0
+                        currentImageIndex < 0
                     ) {
 
                         currentImageIndex =
                             currentProduct
-                                .images.length -
-                            1;
+                                .images.length - 1;
                     }
 
 
@@ -1834,16 +1500,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-         * Next
+         * Next image
          */
 
         document
-            .getElementById(
-                "product-next"
-            )
+            .getElementById("product-next")
             ?.addEventListener(
                 "click",
-                event => {
+                (event) => {
 
                     event.stopPropagation();
 
@@ -1866,13 +1530,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-         * Options
+         * Product options
          */
 
         document
-            .querySelectorAll(
-                ".option-button"
-            )
+            .querySelectorAll(".option-button")
             .forEach(button => {
 
                 button.addEventListener(
@@ -1907,11 +1569,15 @@ document.addEventListener("DOMContentLoaded", () => {
                             );
 
 
-                        button.classList.add(
-                            "selected"
-                        );
+                        button
+                            .classList
+                            .add(
+                                "selected"
+                            );
+
                     }
                 );
+
             });
 
 
@@ -1928,14 +1594,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 () => {
 
                     if (
-                        currentQuantity >
-                        1
+                        currentQuantity > 1
                     ) {
 
                         currentQuantity--;
 
                         updateQuantity();
+
                     }
+
                 }
             );
 
@@ -1955,6 +1622,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     currentQuantity++;
 
                     updateQuantity();
+
                 }
             );
 
@@ -1982,8 +1650,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     closeProductModal();
 
-
                     openCart();
+
                 }
             );
     }
@@ -2001,12 +1669,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
             quantityElement.textContent =
                 currentQuantity;
+
         }
     }
 
 
     /* =====================================================
-       11. CATEGORY MODAL
+       15. CATEGORY MODAL
        ===================================================== */
 
     const categoryModal =
@@ -2029,7 +1698,6 @@ document.addEventListener("DOMContentLoaded", () => {
             !categoryModal ||
             !categoryProductGrid
         ) {
-
             return;
         }
 
@@ -2090,32 +1758,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         if (
-            categoryProducts.length ===
-            0
+            categoryProducts.length === 0
         ) {
 
             categoryProductGrid.innerHTML = `
 
-                <div
-                    class="col-span-full text-center py-20">
+                <div class="col-span-full text-center py-20">
 
-                    <p
-                        class="font-serif text-3xl text-charcoal/40">
-
+                    <p class="font-serif text-3xl text-charcoal/40">
                         Coming Soon
-
                     </p>
 
-
-                    <p
-                        class="text-sm text-charcoal/50 mt-3">
-
+                    <p class="text-sm text-charcoal/50 mt-3">
                         More Terra Haven pieces are coming soon.
-
                     </p>
 
                 </div>
-
             `;
 
         } else {
@@ -2128,6 +1786,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             product
                         )
                     );
+
                 }
             );
         }
@@ -2138,26 +1797,9 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        lockBackground();
-
-
-        /*
-         * Make sure the popup starts at the top.
-         */
-
-        const panel =
-            categoryModal.querySelector(
-                ".category-modal-panel"
-            );
-
-
-        if (panel) {
-
-            panel.scrollTop = 0;
-
-            panel.style.overscrollBehavior =
-                "contain";
-        }
+        document.body.classList.add(
+            "modal-open"
+        );
     }
 
 
@@ -2171,12 +1813,14 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        unlockBackground();
+        document.body.classList.remove(
+            "modal-open"
+        );
     }
 
 
     /* =====================================================
-       12. CATEGORY CARDS
+       16. CATEGORY CARD CONNECTION
        ===================================================== */
 
     const categoryCards =
@@ -2188,29 +1832,26 @@ document.addEventListener("DOMContentLoaded", () => {
     categoryCards.forEach(
         card => {
 
-            const heading =
-                card.querySelector(
-                    "h4"
-                );
+            const title =
+                card.querySelector("h4");
 
 
-            if (!heading) return;
+            if (!title) return;
 
 
             const categoryName =
-                heading.textContent.trim();
+                title.textContent.trim();
 
 
             /*
-             * Leave Make It Yours for
-             * the customization system.
+             * Don't open the product collection
+             * for Make It Yours yet.
              */
 
             if (
                 categoryName ===
                 "Make It Yours"
             ) {
-
                 return;
             }
 
@@ -2218,6 +1859,10 @@ document.addEventListener("DOMContentLoaded", () => {
             let mappedCategory =
                 categoryName;
 
+
+            /*
+             * Match the product database exactly.
+             */
 
             if (
                 categoryName ===
@@ -2231,11 +1876,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             card.addEventListener(
                 "click",
-                event => {
+                (event) => {
 
                     /*
-                     * Don't open collection when
-                     * clicking a button.
+                     * Prevent clicking the
+                     * Customize button from
+                     * accidentally opening category.
                      */
 
                     if (
@@ -2258,112 +1904,98 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       13. SHOP ALL
+       17. SHOP ALL PRODUCTS
        ===================================================== */
 
-    document
-        .getElementById(
+    const shopAllButton =
+        document.getElementById(
             "shop-all-btn"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                if (
-                    !categoryModal ||
-                    !categoryProductGrid
-                ) {
-
-                    return;
-                }
-
-
-                const label =
-                    document.getElementById(
-                        "category-modal-label"
-                    );
-
-
-                const title =
-                    document.getElementById(
-                        "category-modal-title"
-                    );
-
-
-                const description =
-                    document.getElementById(
-                        "category-modal-description"
-                    );
-
-
-                if (label) {
-
-                    label.textContent =
-                        "Complete Collection";
-                }
-
-
-                if (title) {
-
-                    title.textContent =
-                        "Shop All Products";
-                }
-
-
-                if (description) {
-
-                    description.textContent =
-                        "Explore the complete Terra Haven collection.";
-                }
-
-
-                categoryProductGrid.innerHTML =
-                    "";
-
-
-                products.forEach(
-                    product => {
-
-                        categoryProductGrid.appendChild(
-                            createProductCard(
-                                product
-                            )
-                        );
-                    }
-                );
-
-
-                categoryModal.classList.remove(
-                    "hidden"
-                );
-
-
-                lockBackground();
-
-
-                const panel =
-                    categoryModal.querySelector(
-                        ".category-modal-panel"
-                    );
-
-
-                if (panel) {
-
-                    panel.scrollTop = 0;
-                }
-            }
         );
+
+
+    shopAllButton?.addEventListener(
+        "click",
+        () => {
+
+            if (
+                !categoryModal ||
+                !categoryProductGrid
+            ) {
+                return;
+            }
+
+
+            const label =
+                document.getElementById(
+                    "category-modal-label"
+                );
+
+
+            const title =
+                document.getElementById(
+                    "category-modal-title"
+                );
+
+
+            const description =
+                document.getElementById(
+                    "category-modal-description"
+                );
+
+
+            if (label) {
+
+                label.textContent =
+                    "Complete Collection";
+            }
+
+
+            if (title) {
+
+                title.textContent =
+                    "Shop All Products";
+            }
+
+
+            if (description) {
+
+                description.textContent =
+                    "Explore the complete Terra Haven collection.";
+            }
+
+
+            categoryProductGrid.innerHTML =
+                "";
+
+
+            products.forEach(
+                product => {
+
+                    categoryProductGrid.appendChild(
+                        createProductCard(
+                            product
+                        )
+                    );
+
+                }
+            );
+
+
+            categoryModal.classList.remove(
+                "hidden"
+            );
+
+
+            document.body.classList.add(
+                "modal-open"
+            );
+        }
+    );
 
 
     /* =====================================================
-       14. CART
+       18. CART SYSTEM
        ===================================================== */
-
-    const cartDrawer =
-        document.getElementById(
-            "cart-drawer"
-        );
-
 
     function addToCart(
         product,
@@ -2371,7 +2003,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selections
     ) {
 
-        const key =
+        const selectionKey =
             JSON.stringify(
                 selections || {}
             );
@@ -2384,7 +2016,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         product.id &&
                     JSON.stringify(
                         item.selections
-                    ) === key
+                    ) ===
+                        selectionKey
             );
 
 
@@ -2415,7 +2048,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       15. CART COUNT
+       19. CART COUNT
        ===================================================== */
 
     function updateCartCount() {
@@ -2429,9 +2062,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         document
-            .querySelectorAll(
-                "nav a"
-            )
+            .querySelectorAll("nav a")
             .forEach(link => {
 
                 const text =
@@ -2441,20 +2072,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 if (
-                    text.startsWith(
-                        "cart"
-                    )
+                    text.startsWith("cart")
                 ) {
 
                     link.textContent =
                         `Cart (${total})`;
                 }
+
             });
     }
 
 
     /* =====================================================
-       16. CART RENDER
+       20. CART RENDER
        ===================================================== */
 
     function renderCart() {
@@ -2475,7 +2105,6 @@ document.addEventListener("DOMContentLoaded", () => {
             !cartItems ||
             !cartTotal
         ) {
-
             return;
         }
 
@@ -2484,26 +2113,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             cartItems.innerHTML = `
 
-                <div
-                    class="text-center py-16">
+                <div class="text-center py-16">
 
-                    <div
-                        class="font-serif text-3xl text-charcoal/30">
-
+                    <div class="font-serif text-3xl text-charcoal/30">
                         Your cart is empty
-
                     </div>
 
-
-                    <p
-                        class="text-sm text-charcoal/50 mt-3">
-
+                    <p class="text-sm text-charcoal/50 mt-3">
                         Add something beautiful to your collection.
-
                     </p>
 
                 </div>
-
             `;
 
 
@@ -2532,17 +2152,25 @@ document.addEventListener("DOMContentLoaded", () => {
                             itemTotal;
 
 
-                        const optionValues =
+                        const selectionValues =
                             Object.values(
-                                item.selections ||
-                                {}
+                                item.selections || {}
                             );
+
+
+                        const optionsText =
+                            selectionValues.length
+                                ?
+                                selectionValues.join(
+                                    " • "
+                                )
+                                :
+                                "";
 
 
                         return `
 
-                            <div
-                                class="cart-item">
+                            <div class="cart-item">
 
                                 <img
                                     src="${item.product.images[0]}"
@@ -2550,32 +2178,19 @@ document.addEventListener("DOMContentLoaded", () => {
                                 >
 
 
-                                <div
-                                    class="flex-1 min-w-0">
+                                <div class="flex-1 min-w-0">
 
-                                    <h3
-                                        class="font-serif text-lg">
-
-                                        ${escapeHtml(
-                                            item.product.name
-                                        )}
-
+                                    <h3 class="font-serif text-lg">
+                                        ${escapeHtml(item.product.name)}
                                     </h3>
 
 
                                     ${
-                                        optionValues.length
+                                        optionsText
                                         ?
                                         `
-                                        <p
-                                            class="text-xs text-charcoal/50 mt-1">
-
-                                            ${escapeHtml(
-                                                optionValues.join(
-                                                    " • "
-                                                )
-                                            )}
-
+                                        <p class="text-xs text-charcoal/50 mt-1">
+                                            ${escapeHtml(optionsText)}
                                         </p>
                                         `
                                         :
@@ -2583,25 +2198,14 @@ document.addEventListener("DOMContentLoaded", () => {
                                     }
 
 
-                                    <p
-                                        class="text-xs mt-2">
-
-                                        ${item.quantity}
-                                        ×
-                                        ${formatPrice(
-                                            item.product.price
-                                        )}
-
+                                    <p class="text-xs mt-2">
+                                        ${item.quantity} ×
+                                        ${formatPrice(item.product.price)}
                                     </p>
 
 
-                                    <p
-                                        class="font-medium text-sm mt-1">
-
-                                        ${formatPrice(
-                                            itemTotal
-                                        )}
-
+                                    <p class="font-medium text-sm mt-1">
+                                        ${formatPrice(itemTotal)}
                                     </p>
 
                                 </div>
@@ -2617,7 +2221,6 @@ document.addEventListener("DOMContentLoaded", () => {
                                 </button>
 
                             </div>
-
                         `;
                     }
                 )
@@ -2660,8 +2263,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       17. OPEN CART
+       21. CART DRAWER
        ===================================================== */
+
+    const cartDrawer =
+        document.getElementById(
+            "cart-drawer"
+        );
+
 
     function openCart() {
 
@@ -2673,29 +2282,14 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        lockBackground();
-
-
-        const cartItems =
-            document.getElementById(
-                "cart-items"
-            );
-
-
-        if (cartItems) {
-
-            cartItems.style.overscrollBehavior =
-                "contain";
-        }
+        document.body.classList.add(
+            "modal-open"
+        );
 
 
         renderCart();
     }
 
-
-    /* =====================================================
-       18. CLOSE CART
-       ===================================================== */
 
     function closeCart() {
 
@@ -2707,27 +2301,25 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        unlockBackground();
+        document.body.classList.remove(
+            "modal-open"
+        );
     }
 
 
     /* =====================================================
-       19. CART NAVIGATION
+       22. NAVBAR CART
        ===================================================== */
 
     document
-        .querySelectorAll(
-            "nav a"
-        )
+        .querySelectorAll("nav a")
         .forEach(link => {
 
             if (
                 link.textContent
                     .trim()
                     .toLowerCase()
-                    .startsWith(
-                        "cart"
-                    )
+                    .startsWith("cart")
             ) {
 
                 link.addEventListener(
@@ -2737,6 +2329,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         event.preventDefault();
 
                         openCart();
+
                     }
                 );
             }
@@ -2744,7 +2337,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       20. CLOSE BUTTONS
+       23. CLOSE PRODUCT MODAL
        ===================================================== */
 
     document
@@ -2767,6 +2360,10 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
+    /* =====================================================
+       24. CLOSE CATEGORY MODAL
+       ===================================================== */
+
     document
         .getElementById(
             "category-modal-close"
@@ -2786,6 +2383,10 @@ document.addEventListener("DOMContentLoaded", () => {
             closeCategoryModal
         );
 
+
+    /* =====================================================
+       25. CLOSE CART
+       ===================================================== */
 
     document
         .getElementById(
@@ -2808,7 +2409,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       21. ESC KEY
+       26. ESC KEY
        ===================================================== */
 
     document.addEventListener(
@@ -2819,7 +2420,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 event.key !==
                 "Escape"
             ) {
-
                 return;
             }
 
@@ -2834,7 +2434,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       22. NAVBAR
+       27. NAVBAR BACKGROUND
        ===================================================== */
 
     const navbar =
@@ -2870,7 +2470,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       23. INITIALISE
+       28. INITIAL CART
        ===================================================== */
 
     renderCart();
@@ -2879,20 +2479,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       24. REFRESH GSAP
+       29. PRODUCT FADE-UP
        ===================================================== */
 
     if (
-        typeof ScrollTrigger !==
-        "undefined"
+        typeof gsap !== "undefined" &&
+        typeof ScrollTrigger !== "undefined"
     ) {
 
-        setTimeout(
-            () => {
-                ScrollTrigger.refresh();
-            },
-            500
-        );
+        const fadeElements =
+            document.querySelectorAll(
+                ".fade-up"
+            );
+
+
+        if (fadeElements.length) {
+
+            gsap.from(
+                fadeElements,
+                {
+                    scrollTrigger: {
+                        trigger: "#categories",
+                        start: "top 80%"
+                    },
+
+                    y: 50,
+
+                    opacity: 0,
+
+                    duration: 1,
+
+                    stagger: 0.15,
+
+                    ease: "power3.out"
+                }
+            );
+        }
     }
+
+
+    /* =====================================================
+       30. REFRESH SCROLLTRIGGER
+       ===================================================== */
+
+    setTimeout(() => {
+
+        if (
+            typeof ScrollTrigger !==
+            "undefined"
+        ) {
+
+            ScrollTrigger.refresh();
+        }
+
+    }, 500);
 
 });
