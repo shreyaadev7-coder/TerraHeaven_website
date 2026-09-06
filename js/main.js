@@ -1206,15 +1206,17 @@ if (productPanel) {
     function closeProductModal() {
 
         if (!productModal) return;
+productModal.classList.add(
+    "hidden"
+);
 
+document.body.classList.remove(
+    "modal-open"
+);
 
-        productModal.classList.add(
-            "hidden"
-        );
-
-
-        document.body.classList.remove(
-            "modal-open"
+if (lenis) {
+    lenis.start();
+}
         );
     }
 
