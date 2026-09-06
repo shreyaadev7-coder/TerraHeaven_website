@@ -1828,15 +1828,20 @@ if (categoryPanel) {
     function closeCategoryModal() {
 
         if (!categoryModal) return;
+categoryModal.classList.add(
+    "hidden"
+);
 
+document.body.classList.remove(
+    "modal-open"
+);
 
-        categoryModal.classList.add(
-            "hidden"
-        );
-
-
-        document.body.classList.remove(
-            "modal-open"
+/*
+ * Restart normal page scrolling.
+ */
+if (lenis) {
+    lenis.start();
+}
         );
     }
 
