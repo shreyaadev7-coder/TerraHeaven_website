@@ -609,201 +609,323 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const products = [
 
-        /* -------------------------
-           BEDSPREADS
-           ------------------------- */
+       /* =====================================================
+   BEDSPREADS
+   ===================================================== */
 
+{
+    id: "bedspread-1",
+    category: "Bedspreads",
+    name: "Terra Haven Bedspread 01",
+
+    description:
+        "A timeless Terra Haven bedspread designed to bring warmth and character into your bedroom.",
+
+    images: [
+        "assets/images/bedspread-1.png"
+    ],
+
+    price: 2499,
+
+    options: [
         {
-            id: "double-bed-1",
-            category: "Bedspreads",
-            name: "Double Bed Collection",
-
-            description:
-                "A warm, timeless textile designed to bring softness and character into your bedroom.",
-
-            images: [
-                "assets/images/Bed Double 1A.png",
-                "assets/images/Bed Double 1B.png",
-                "assets/images/Bed Double 1C.png"
-            ],
-
-            price: 3499,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Double Cot",
-                        "Queen",
-                        "King"
-                    ]
-                }
+            label: "Size",
+            values: [
+                "Single",
+                "Double",
+                "Queen",
+                "King"
             ]
-        },
+        }
+    ]
+},
 
 
+{
+    id: "bedspread-2",
+    category: "Bedspreads",
+    name: "Terra Haven Bedspread 02",
+
+    images: [
+        "assets/images/bedspread-2.png"
+    ],
+
+    price: 2599,
+
+    options: [
         {
-            id: "single-bed-1",
-            category: "Bedspreads",
-            name: "Single Bed Collection",
-
-            description:
-                "A soft everyday bed layer with an understated Terra Haven finish.",
-
-            images: [
-                "assets/images/Single BS1.png",
-                "assets/images/Single BS2.png"
-            ],
-
-            price: 2299,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single"
-                    ]
-                }
+            label: "Size",
+            values: [
+                "Single",
+                "Double",
+                "Queen",
+                "King"
             ]
-        },
+        }
+    ]
+},
 
 
-        /* -------------------------
-           CUSHIONS
-           ------------------------- */
+{
+    id: "bedspread-3",
+    category: "Bedspreads",
+    name: "Terra Haven Bedspread 03",
 
+    images: [
+        "assets/images/bedspread-3.png"
+    ],
+
+    price: 2699,
+
+    options: [
         {
-            id: "cushion-1",
-            category: "Cushions",
-            name: "Terra Cushion 01",
-
-            description:
-                "A handcrafted accent cushion designed to add texture and warmth.",
-
-            images: [
-                "assets/images/Cushion 1A.jpeg",
-                "assets/images/cushion 1B.jpeg"
-            ],
-
-            price: 799
-        },
-
-
-        {
-            id: "cushion-2",
-            category: "Cushions",
-            name: "Terra Cushion 02",
-
-            description:
-                "An earthy statement cushion for relaxed and layered interiors.",
-
-            images: [
-                "assets/images/cushion 2.jpeg",
-                "assets/images/cushion 2B.jpeg"
-            ],
-
-            price: 849
-        },
-
-
-        {
-            id: "cushion-3",
-            category: "Cushions",
-            name: "Terra Cushion 03",
-
-            description:
-                "A refined cushion designed to complement natural interiors.",
-
-            images: [
-                "assets/images/cushion 3.jpeg"
-            ],
-
-            price: 899
-        },
-
-
-        {
-            id: "cushion-4",
-            category: "Cushions",
-            name: "Terra Cushion 04",
-
-            description:
-                "A subtle decorative layer inspired by natural tones.",
-
-            images: [
-                "assets/images/cushion 4.jpeg"
-            ],
-
-            price: 899
-        },
-
-
-        {
-            id: "cushion-5",
-            category: "Cushions",
-            name: "Terra Cushion 05",
-
-            description:
-                "A soft textured cushion made for calm, inviting spaces.",
-
-            images: [
-                "assets/images/cushion 5.jpeg",
-                "assets/images/cushion 5A.jpeg"
-            ],
-
-            price: 949
-        },
-
-
-        /* -------------------------
-           BAGS
-           ------------------------- */
-
-        {
-            id: "bag-3",
-            category: "Lifestyle Bags",
-            name: "Terra Everyday Bag",
-
-            description:
-                "An everyday lifestyle bag balancing simplicity, utility and natural character.",
-
-            images: [
-                "assets/images/Bag 3A.png",
-                "assets/images/Bag 3B.png"
-            ],
-
-            price: 1499
-        },
-
-
-        {
-            id: "tote-1",
-            category: "Lifestyle Bags",
-            name: "The Haven Linen Tote",
-
-            description:
-                "A relaxed, versatile tote for everyday use.",
-
-            images: [
-                "assets/images/Tote 1B.jpeg",
-                "assets/images/Tote 1S.jpeg"
-            ],
-
-            price: 1399,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Small",
-                        "Medium",
-                        "Large"
-                    ]
-                }
+            label: "Size",
+            values: [
+                "Single",
+                "Double",
+                "Queen",
+                "King"
             ]
-        },
+        }
+    ]
+},
 
 
+{
+    id: "bedspread-4",
+    category: "Bedspreads",
+    name: "Terra Haven Bedspread 04",
+
+    images: [
+        "assets/images/bedspread-4.png"
+    ],
+
+    price: 2799,
+
+    options: [
+        {
+            label: "Size",
+            values: [
+                "Single",
+                "Double",
+                "Queen",
+                "King"
+            ]
+        }
+    ]
+},
+
+
+{
+    id: "bedspread-5",
+    category: "Bedspreads",
+    name: "Terra Haven Bedspread 05",
+
+    images: [
+        "assets/images/bedspread-5.png"
+    ],
+
+    price: 2899,
+
+    options: [
+        {
+            label: "Size",
+            values: [
+                "Single",
+                "Double",
+                "Queen",
+                "King"
+            ]
+        }
+    ]
+},
+
+
+{
+    id: "bedspread-6",
+    category: "Bedspreads",
+    name: "Terra Haven Bedspread 06",
+
+    images: [
+        "assets/images/bedspread-6.png"
+    ],
+
+    price: 2999,
+
+    options: [
+        {
+            label: "Size",
+            values: [
+                "Single",
+                "Double",
+                "Queen",
+                "King"
+            ]
+        }
+    ]
+},
+
+
+{
+    id: "bedspread-7",
+    category: "Bedspreads",
+    name: "Terra Haven Bedspread 07",
+
+    images: [
+        "assets/images/bedspread-7.png"
+    ],
+
+    price: 3099,
+
+    options: [
+        {
+            label: "Size",
+            values: [
+                "Single",
+                "Double",
+                "Queen",
+                "King"
+            ]
+        }
+    ]
+},
+
+
+{
+    id: "bedspread-8",
+    category: "Bedspreads",
+    name: "Terra Haven Bedspread 08",
+
+    images: [
+        "assets/images/bedspread-8.png"
+    ],
+
+    price: 3199,
+
+    options: [
+        {
+            label: "Size",
+            values: [
+                "Single",
+                "Double",
+                "Queen",
+                "King"
+            ]
+        }
+    ]
+},
+
+
+{
+    id: "bedspread-9",
+    category: "Bedspreads",
+    name: "Terra Haven Bedspread 09",
+
+    images: [
+        "assets/images/bedspread-9.png"
+    ],
+
+    price: 3299,
+
+    options: [
+        {
+            label: "Size",
+            values: [
+                "Single",
+                "Double",
+                "Queen",
+                "King"
+            ]
+        }
+    ]
+},
+
+
+{
+    id: "bedspread-10",
+    category: "Bedspreads",
+    name: "Terra Haven Bedspread 10",
+
+    images: [
+        "assets/images/bedspread-10.png"
+    ],
+
+    price: 3399,
+
+    options: [
+        {
+            label: "Size",
+            values: [
+                "Single",
+                "Double",
+                "Queen",
+                "King"
+            ]
+        }
+    ]
+},
+
+
+/* =====================================================
+   DOUBLE BED
+   3 IMAGES = ONE PRODUCT SLIDER
+   ===================================================== */
+
+{
+    id: "double-bed-1",
+    category: "Bedspreads",
+    name: "Double Bed Collection",
+
+    description:
+        "A complete double-bed collection presented through three product views.",
+
+    images: [
+        "assets/images/Bed Double 1A.png",
+        "assets/images/Bed Double 1B.png",
+        "assets/images/Bed Double 1C.png"
+    ],
+
+    price: 3499,
+
+    options: [
+        {
+            label: "Size",
+            values: [
+                "Double Cot",
+                "Queen",
+                "King"
+            ]
+        }
+    ]
+},
+
+
+/* =====================================================
+   SINGLE BED
+   2 IMAGES = ONE PRODUCT SLIDER
+   ===================================================== */
+
+{
+    id: "single-bed-1",
+    category: "Bedspreads",
+    name: "Single Bed Collection",
+
+    images: [
+        "assets/images/Single BS1.png",
+        "assets/images/Single BS2.png"
+    ],
+
+    price: 2299,
+
+    options: [
+        {
+            label: "Size",
+            values: [
+                "Single"
+            ]
+        }
+    ]
+},
         /* -------------------------
            OILS
            ------------------------- */
