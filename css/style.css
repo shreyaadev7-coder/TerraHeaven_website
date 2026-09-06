@@ -549,3 +549,66 @@ body {
 #cart-items {
     overflow-y: auto;
 }
+/* =========================================================
+   TERRA HAVEN LOGO
+   ========================================================= */
+
+
+/* LOADING LOGO */
+
+.terra-loader-logo {
+    display: block;
+    max-width: 220px;
+    height: auto;
+    object-fit: contain;
+}
+
+
+/* NAVBAR LOGO */
+
+.terra-navbar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        transform 0.3s ease,
+        opacity 0.3s ease;
+}
+
+.terra-navbar-logo:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
+
+.terra-navbar-logo img {
+    display: block;
+    height: auto;
+    object-fit: contain;
+}
+
+
+/* FOOTER LOGO */
+
+.terra-footer-logo {
+    display: block;
+    height: auto;
+    object-fit: contain;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 640px) {
+
+    .terra-loader-logo {
+        max-width: 170px;
+    }
+
+    .terra-navbar-logo img {
+        width: 115px;
+    }
+
+    .terra-footer-logo {
+        width: 170px;
+    }
+}
