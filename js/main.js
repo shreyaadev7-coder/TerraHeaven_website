@@ -1790,15 +1790,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             );
         }
+categoryModal.classList.remove(
+    "hidden"
+);
 
+document.body.classList.add(
+    "modal-open"
+);
 
-        categoryModal.classList.remove(
-            "hidden"
-        );
+/*
+ * Stop Lenis from controlling the background page.
+ * The category popup will use its own native scrollbar.
+ */
+if (lenis) {
+    lenis.stop();
+}
 
+/*
+ * Make sure the popup itself can receive touchpad
+ * and mouse-wheel scrolling.
+ */
+const categoryPanel =
+    categoryModal.querySelector(
+        ".category-modal-panel"
+    );
 
-        document.body.classList.add(
-            "modal-open"
+if (categoryPanel) {
+    categoryPanel.setAttribute(
+        "data-lenis-prevent",
+        ""
+    );
+}
         );
     }
 
