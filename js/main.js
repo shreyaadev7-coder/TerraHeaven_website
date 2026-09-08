@@ -827,7 +827,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/cushion 5A.jpeg"
             ],
 
-            price: 949
+            price: 449
         },
 
 
