@@ -173,7 +173,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let targetX = 0;
         let maxX = 0;
 
-        let pointerInside = false;
         let dragging = false;
 
         let dragStartX = 0;
@@ -265,26 +264,6 @@ document.addEventListener("DOMContentLoaded", () => {
          * Mouse entered section.
          */
 
-        horizontalSection.addEventListener(
-            "mouseenter",
-            () => {
-                pointerInside = true;
-            }
-        );
-
-
-        /*
-         * Mouse left section.
-         */
-
-        horizontalSection.addEventListener(
-            "mouseleave",
-            () => {
-                pointerInside = false;
-            }
-        );
-
-
         /*
          * Wheel / touchpad.
          */
@@ -292,20 +271,15 @@ document.addEventListener("DOMContentLoaded", () => {
         horizontalSection.addEventListener(
             "wheel",
             (event) => {
-
-                if (!pointerInside) {
-                    return;
-                }
-
-
                 /*
                  * Combine vertical and horizontal
                  * touchpad movement.
                  */
 
                 let movement =
-                    event.deltaY +
-                    event.deltaX;
+                    Math.abs(event.deltaX) > Math.abs(event.deltaY)
+                        ? event.deltaX
+                        : event.deltaY;
 
 
                 /*
@@ -313,14 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
                  * prevent huge jumps.
                  */
 
-                movement =
-                    Math.max(
-                        -100,
-                        Math.min(
-                            movement,
-                            100
-                        )
-                    );
+                movement = Math.max(-60, Math.min(movement * 0.65, 60));
 
 
                 const movingForward =
@@ -386,6 +353,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 dragStartPosition =
                     targetX;
 
+                document.body.style.userSelect = "none";
+
 
                 horizontalTrack.style.cursor =
                     "grabbing";
@@ -409,6 +378,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     dragStartX -
                     event.clientX;
 
+                if (Math.abs(distance) > 5) {
+                    horizontalTrack.dataset.dragged = "true";
+                }
+
 
                 targetX =
                     Math.max(
@@ -419,6 +392,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             maxX
                         )
                     );
+
+                event.preventDefault();
             }
         );
 
@@ -436,6 +411,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 horizontalTrack.style.cursor =
                     "grab";
+
+                document.body.style.userSelect = "";
             }
         );
 
@@ -552,6 +529,16 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
+        if (typeof ResizeObserver !== "undefined") {
+            const resizeObserver = new ResizeObserver(
+                calculateHorizontalDistance
+            );
+
+            resizeObserver.observe(horizontalSection);
+            resizeObserver.observe(horizontalTrack);
+        }
+
+
         /*
          * Wait for all images.
          */
@@ -560,6 +547,12 @@ document.addEventListener("DOMContentLoaded", () => {
             "load",
             calculateHorizontalDistance
         );
+
+        horizontalTrack.querySelectorAll("img").forEach(image => {
+            image.addEventListener("load", calculateHorizontalDistance, {
+                once: true
+            });
+        });
 
 
         setTimeout(
@@ -627,14 +620,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/Bed Double 1C.png"
             ],
 
-            price: 3499,
+            price: 1299,
 
             options: [
                 {
                     label: "Size",
                     values: [
                         "Double Cot",
-                        "Queen",
+                        "108 inches X 108 inches",
                         "King"
                     ]
                 }
@@ -655,7 +648,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/Single BS2.png"
             ],
 
-            price: 2299,
+            price: 499,
 
             options: [
                 {
@@ -665,6 +658,98 @@ document.addEventListener("DOMContentLoaded", () => {
                     ]
                 }
             ]
+        },
+
+
+        {
+            id: "bedspread-1",
+            category: "Bedspreads",
+            name: "Botanical Haven Bedspread",
+            description: "A softly patterned bedspread that brings natural character and everyday comfort to the bedroom.",
+            images: ["assets/images/bedspread-1.png"],
+            price: 899,
+            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+        },
+        {
+            id: "bedspread-2",
+            category: "Bedspreads",
+            name: "Warm Earth Bedspread",
+            description: "A warm, versatile layer designed for relaxed bedrooms and timeless styling.",
+            images: ["assets/images/bedspread-2.png"],
+            price: 899,
+            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+        },
+        {
+            id: "bedspread-3",
+            category: "Bedspreads",
+            name: "Quiet Meadow Bedspread",
+            description: "A gentle textile layer with a calm finish for inviting everyday spaces.",
+            images: ["assets/images/bedspread-3.png"],
+            price: 949,
+            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+        },
+        {
+            id: "bedspread-4",
+            category: "Bedspreads",
+            name: "Clay Garden Bedspread",
+            description: "A characterful bedspread inspired by earthy tones and simple natural forms.",
+            images: ["assets/images/bedspread-4.png"],
+            price: 949,
+            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+        },
+        {
+            id: "bedspread-5",
+            category: "Bedspreads",
+            name: "Terra Bloom Bedspread",
+            description: "A comfortable decorative layer that adds softness and warmth without feeling heavy.",
+            images: ["assets/images/bedspread-5.png"],
+            price: 999,
+            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+        },
+        {
+            id: "bedspread-6",
+            category: "Bedspreads",
+            name: "Sunwashed Linen Bedspread",
+            description: "A light, easygoing bedspread made for calm rooms and unhurried mornings.",
+            images: ["assets/images/bedspread-6.png"],
+            price: 999,
+            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+        },
+        {
+            id: "bedspread-7",
+            category: "Bedspreads",
+            name: "Harvest Petal Bedspread",
+            description: "A softly expressive textile that layers beautifully with natural bedroom accents.",
+            images: ["assets/images/bedspread-7.png"],
+            price: 1049,
+            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+        },
+        {
+            id: "bedspread-8",
+            category: "Bedspreads",
+            name: "Garden Path Bedspread",
+            description: "A relaxed bed layer with an inviting pattern and a considered Terra Haven feel.",
+            images: ["assets/images/bedspread-8.png"],
+            price: 1049,
+            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+        },
+        {
+            id: "bedspread-9",
+            category: "Bedspreads",
+            name: "Natural Rhythm Bedspread",
+            description: "A tactile, versatile textile designed to bring comfort and character to the home.",
+            images: ["assets/images/bedspread-9.png"],
+            price: 1099,
+            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+        },
+        {
+            id: "bedspread-10",
+            category: "Bedspreads",
+            name: "Haven Petals Bedspread",
+            description: "A distinctive final layer for bedrooms that feel personal, warm and lived in.",
+            images: ["assets/images/bedspread-10.png"],
+            price: 1099,
+            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
         },
 
 
@@ -685,7 +770,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/cushion 1B.jpeg"
             ],
 
-            price: 799
+            price: 199
         },
 
 
@@ -702,7 +787,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/cushion 2B.jpeg"
             ],
 
-            price: 849
+            price: 199
         },
 
 
@@ -718,7 +803,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/cushion 3.jpeg"
             ],
 
-            price: 899
+            price: 199
         },
 
 
@@ -734,7 +819,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/cushion 4.jpeg"
             ],
 
-            price: 899
+            price: 199
         },
 
 
@@ -772,7 +857,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/Bag 3B.png"
             ],
 
-            price: 1499
+            price: 199
         },
 
 
@@ -789,7 +874,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/Tote 1S.jpeg"
             ],
 
-            price: 1399,
+            price: 199,
 
             options: [
                 {
@@ -820,7 +905,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/oil-sesame.png"
             ],
 
-            price: 449,
+            price: 235,
 
             options: [
                 {
@@ -846,7 +931,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/oil-groundnut.png"
             ],
 
-            price: 429,
+            price: 168,
 
             options: [
                 {
@@ -872,7 +957,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/oil-coconut.png"
             ],
 
-            price: 479,
+            price: 285,
 
             options: [
                 {
@@ -893,7 +978,7 @@ document.addEventListener("DOMContentLoaded", () => {
         {
             id: "quilt-1",
             category: "Quilts",
-            name: "Terra Quilt 01",
+            name: "Botanical Butterfly Terra Quilt",
 
             description:
                 "A comfortable quilt designed for warm, relaxed interiors.",
@@ -902,31 +987,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/quilt-1.png"
             ],
 
-            price: 3299
+            price: 1199
         },
 
 
         {
             id: "quilt-2",
             category: "Quilts",
-            name: "Terra Quilt 02",
+            name: "Mangolia Floral Terra Quilt",
 
             description:
-                "A layered quilt with an earthy, understated aesthetic.",
+                "A layered quilt with an earthy, understated aesthetic made with 100% cotton fabric.",
 
             images: [
                 "assets/images/quilt-2.png",
                 "assets/images/quilt-2b.png"
             ],
 
-            price: 3499
+            price: 1199
         },
 
 
         {
             id: "quilt-3",
             category: "Quilts",
-            name: "Terra Quilt 03",
+            name: "Flower Tile Terra Quilt",
 
             description:
                 "A tactile quilt designed to bring comfort and character home.",
@@ -936,24 +1021,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/quilt-3b.png"
             ],
 
-            price: 3699
+            price: 1199
         },
 
 
         {
             id: "quilt-4",
             category: "Quilts",
-            name: "Terra Quilt 04",
+            name: "Golden Rose Terra Quilt",
 
             description:
-                "A timeless quilt inspired by natural textures.",
+                "A timeless quilt inspired by natural textures.100% Cotton fabric.",
 
             images: [
                 "assets/images/quilt-4.png",
                 "assets/images/quilt-4b.png"
             ],
 
-            price: 3899
+            price: 1199
         }
 
     ];
@@ -1877,6 +1962,12 @@ document.addEventListener("DOMContentLoaded", () => {
             card.addEventListener(
                 "click",
                 (event) => {
+
+                    if (horizontalTrack.dataset.dragged === "true") {
+                        horizontalTrack.dataset.dragged = "false";
+                        event.preventDefault();
+                        return;
+                    }
 
                     /*
                      * Prevent clicking the

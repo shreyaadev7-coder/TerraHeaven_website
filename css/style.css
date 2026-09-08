@@ -24,6 +24,26 @@ body {
     overflow-x: hidden; 
 }
 
+#horizontal-scroll {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    overscroll-behavior-x: contain;
+    touch-action: pan-y;
+}
+
+#horizontal-track {
+    max-width: none;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+    will-change: transform;
+}
+
+#horizontal-track:active {
+    cursor: grabbing;
+}
+
 .img-wrap { 
     overflow: hidden; 
 }
