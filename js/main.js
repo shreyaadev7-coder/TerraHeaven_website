@@ -698,15 +698,6 @@ document.addEventListener("DOMContentLoaded", () => {
             options: [{ label: "Size", values: ["Single", "Double", "King"] }]
         },
         {
-            id: "bedspread-5",
-            category: "Bedspreads",
-            name: "Terra Bloom Bedspread",
-            description: "A comfortable decorative layer that adds softness and warmth without feeling heavy.",
-            images: ["assets/images/bedspread-5.png"],
-            price: 999,
-            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
-        },
-        {
             id: "bedspread-6",
             category: "Bedspreads",
             name: "Sunwashed Linen Bedspread",
