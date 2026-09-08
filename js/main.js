@@ -647,7 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/images/Single BS1.png",
                 "assets/images/Single BS2.png",
                 "assets/images/Single BS3.png",
-                "assets/images/Single BS 4.png",
+                "assets/images/Single BS4.png",
                 "assets/images/Single BS5.png",
                 "assets/images/Single BS6.png",
                 "assets/images/Single BS7.png"
@@ -2424,7 +2424,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       23. CLOSE PRODUCT MODAL
+       23. OUR STORY
+       ===================================================== */
+
+    const storyToggle =
+        document.getElementById("story-toggle");
+
+    const storySection =
+        document.getElementById("our-story");
+
+    storyToggle?.addEventListener("click", () => {
+
+        if (!storySection) return;
+
+        const isExpanded =
+            storyToggle.getAttribute("aria-expanded") === "true";
+
+        storyToggle.setAttribute(
+            "aria-expanded",
+            String(!isExpanded)
+        );
+
+        storyToggle.textContent =
+            isExpanded ? "Read our story" : "Hide our story";
+
+        storySection.classList.toggle("hidden", isExpanded);
+        storySection.setAttribute(
+            "aria-hidden",
+            String(isExpanded)
+        );
+
+        if (!isExpanded) {
+            storySection.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+    });
+
+
+    /* =====================================================
+       24. CLOSE PRODUCT MODAL
        ===================================================== */
 
     document
@@ -2448,7 +2488,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       24. CLOSE CATEGORY MODAL
+    25. CLOSE CATEGORY MODAL
        ===================================================== */
 
     document
@@ -2472,7 +2512,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       25. CLOSE CART
+    26. CLOSE CART
        ===================================================== */
 
     document
@@ -2496,7 +2536,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       26. ESC KEY
+    27. ESC KEY
        ===================================================== */
 
     document.addEventListener(
@@ -2521,7 +2561,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       27. NAVBAR BACKGROUND
+    28. NAVBAR BACKGROUND
        ===================================================== */
 
     const navbar =
@@ -2557,7 +2597,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       28. INITIAL CART
+    29. INITIAL CART
        ===================================================== */
 
     renderCart();
@@ -2566,7 +2606,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       29. PRODUCT FADE-UP
+    30. PRODUCT FADE-UP
        ===================================================== */
 
     if (
@@ -2606,7 +2646,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       30. REFRESH SCROLLTRIGGER
+    31. REFRESH SCROLLTRIGGER
        ===================================================== */
 
     setTimeout(() => {
