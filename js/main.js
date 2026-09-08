@@ -645,7 +645,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             images: [
                 "assets/images/Single BS1.png",
-                "assets/images/Single BS2.png"
+                "assets/images/Single BS2.png",
+                "assets/images/Single BS3.png",
+                "assets/images/Single BS 4.png",
+                "assets/images/Single BS5.png",
+                "assets/images/Single BS6.png",
+                "assets/images/Single BS7.png"
             ],
 
             price: 499,
