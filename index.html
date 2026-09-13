@@ -480,6 +480,87 @@
 
             </div>
 
+            <form
+                id="shipping-form"
+                class="space-y-3 mb-5"
+                novalidate>
+
+                <p class="text-xs uppercase tracking-widest text-clay">
+                    Shipping Details
+                </p>
+
+                <input
+                    name="name"
+                    type="text"
+                    required
+                    autocomplete="name"
+                    placeholder="Full name"
+                    class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input
+                        name="phone"
+                        type="tel"
+                        required
+                        autocomplete="tel"
+                        placeholder="Phone number"
+                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
+
+                    <input
+                        name="email"
+                        type="email"
+                        required
+                        autocomplete="email"
+                        placeholder="Email address"
+                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
+                </div>
+
+                <textarea
+                    name="address"
+                    required
+                    autocomplete="street-address"
+                    placeholder="Shipping address"
+                    rows="2"
+                    class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay"></textarea>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input
+                        name="city"
+                        type="text"
+                        required
+                        autocomplete="address-level2"
+                        placeholder="City"
+                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
+
+                    <input
+                        name="state"
+                        type="text"
+                        required
+                        autocomplete="address-level1"
+                        placeholder="State"
+                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input
+                        name="pincode"
+                        type="text"
+                        required
+                        inputmode="numeric"
+                        autocomplete="postal-code"
+                        placeholder="PIN code"
+                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
+
+                    <input
+                        name="country"
+                        type="text"
+                        required
+                        value="India"
+                        autocomplete="country-name"
+                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
+                </div>
+            </form>
+
             <p
                 id="checkout-message"
                 class="hidden text-sm mb-4"

@@ -2442,6 +2442,11 @@ document.addEventListener("DOMContentLoaded", () => {
             "checkout-message"
         );
 
+    const shippingForm =
+        document.getElementById(
+            "shipping-form"
+        );
+
     let checkoutInProgress = false;
 
 
@@ -2508,6 +2513,14 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        if (!shippingForm || !shippingForm.reportValidity()) {
+            setCheckoutMessage(
+                "Please complete your shipping details.",
+                true
+            );
+            return;
+        }
+
         if (
             typeof window.Razorpay !==
             "function"
@@ -2520,6 +2533,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const amount = getCartAmountInRupees();
+
+        const shipping = Object.fromEntries(
+            new FormData(shippingForm).entries()
+        );
+
+        const cartForShipment = cart.map(item => ({
+            id: item.product.id,
+            name: item.product.name,
+            price: Number(item.product.price),
+            quantity: Number(item.quantity)
+        }));
 
         if (!Number.isFinite(amount) || amount <= 0) {
             setCheckoutMessage(
@@ -2579,7 +2603,11 @@ document.addEventListener("DOMContentLoaded", () => {
                                 headers: {
                                     "Content-Type": "application/json"
                                 },
-                                body: JSON.stringify(paymentResponse)
+                                body: JSON.stringify({
+                                    ...paymentResponse,
+                                    shipping,
+                                    cart: cartForShipment
+                                })
                             }
                         );
 
@@ -2598,7 +2626,13 @@ document.addEventListener("DOMContentLoaded", () => {
                             );
                         }
 
-                        setCheckoutMessage("Payment Successful");
+                        const shipmentMessage =
+                            verificationData.shipment?.status ===
+                            "created"
+                                ? "Payment Successful. Shipment created."
+                                : "Payment Successful. Shipment is being prepared.";
+
+                        setCheckoutMessage(shipmentMessage);
                         resetCheckoutState();
                     } catch (error) {
                         setCheckoutMessage(
