@@ -2480,6 +2480,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    async function readPaymentResponse(response) {
+
+        const responseText = await response.text();
+        let data;
+
+        try {
+            data = JSON.parse(responseText);
+        } catch (error) {
+            throw new Error(
+                responseText.trim().startsWith("<")
+                    ? "Payment API returned HTML instead of JSON. Confirm this site is deployed through Vercel with the /api functions enabled."
+                    : "Payment API returned an invalid response."
+            );
+        }
+
+        return data;
+    }
+
+
     async function startRazorpayCheckout() {
 
         if (checkoutInProgress) return;
@@ -2524,7 +2543,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ amount })
             });
 
-            const orderData = await orderResponse.json();
+            const orderData =
+                await readPaymentResponse(orderResponse);
 
             if (!orderResponse.ok || !orderData.order_id) {
                 throw new Error(
@@ -2564,7 +2584,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         );
 
                         const verificationData =
-                            await verificationResponse.json();
+                            await readPaymentResponse(
+                                verificationResponse
+                            );
 
                         if (
                             !verificationResponse.ok ||
