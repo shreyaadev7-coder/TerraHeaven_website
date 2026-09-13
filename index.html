@@ -56,7 +56,7 @@
         <img
             src="assets/images/Terra Logo.png"
             alt="Terra Haven"
-            class="terra-loader-logo w-40 md:w-52 h-auto object-contain"
+            class="terra-loader-logo h-auto object-contain"
         >
 
         <p class="font-serif text-lg md:text-xl tracking-[0.35em] text-charcoal mt-5 animate-pulse">
@@ -67,23 +67,27 @@
 
 </div>
     <!-- Navigation -->
-    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 py-6 px-8 flex justify-between items-center text-white border-b border-transparent">
-        <div class="hidden md:flex space-x-8 text-sm uppercase tracking-widest">
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 py-6 px-8 flex items-center text-white border-b border-transparent">
+        <div class="terra-navbar-left hidden md:flex space-x-8 text-sm uppercase tracking-widest">
             <a href="#categories" class="hover:text-clay transition-colors">Shop</a>
             <a href="#philosophy" class="hover:text-clay transition-colors">Philosophy</a>
+        </div>
+
         <a
     href="#"
-    class="terra-navbar-logo mx-auto md:mx-0 flex items-center justify-center"
-    aria-label="Terra Haven Home">
+            class="terra-navbar-logo flex items-center justify-center"
+            aria-label="Terra Haven Home">
 
-    <img
-        src="assets/images/Terra Logo.png"
-        alt="Terra Haven"
-        class="terra-navbar-logo-img w-28 md:w-36 lg:w-40 h-auto object-contain"
-    >
+            <img
+                src="assets/images/Terra Logo.png"
+                alt="Terra Haven"
+                class="terra-navbar-logo-img h-auto object-contain"
+            >
 
-</a>
-            <a href="#categories" class="hover:text-clay transition-colors">Gifting</a>
+        </a>
+
+        <div class="terra-navbar-right hidden md:flex space-x-8 text-sm uppercase tracking-widest">
+            <a href="#make-it-yours" class="hover:text-clay transition-colors">Gifting</a>
             <a href="#" class="hover:text-clay transition-colors">Cart (0)</a>
         </div>
     </nav>
@@ -250,13 +254,13 @@
             </div>
 
             <!-- Category 7: Customizable (No image needed, uses SVG icon) -->
-            <div class="w-[260px] md:w-[320px] flex-shrink-0 group cursor-pointer bg-charcoal p-4 shadow-sm hover:shadow-xl transition-shadow duration-500">
+            <div id="make-it-yours" tabindex="-1" class="w-[260px] md:w-[320px] flex-shrink-0 group cursor-pointer bg-charcoal p-4 shadow-sm hover:shadow-xl transition-shadow duration-500">
                 <div class="w-full aspect-[4/5] img-wrap bg-charcoal border border-white/20">
                     <div class="w-full h-full flex flex-col items-center justify-center text-cream p-6 text-center group-hover:scale-105 transition-transform duration-1000">
                         <svg class="w-8 h-8 mb-4 text-clay" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
                         <h4 class="font-serif text-2xl">Make It Yours</h4>
                         <p class="text-xs font-light text-cream/70 mt-2">Personalize sizing, variants, and gift notes.</p>
-                        <button class="mt-6 border border-clay text-clay px-4 py-2 text-xs uppercase tracking-widest hover:bg-clay hover:text-white transition-colors">Customize</button>
+                        <button id="customize-button" class="mt-6 border border-clay text-clay px-4 py-2 text-xs uppercase tracking-widest hover:bg-clay hover:text-white transition-colors">Customize</button>
                     </div>
                 </div>
             </div>
@@ -508,7 +512,7 @@
     <img
         src="assets/images/Terra Logo.png"
         alt="Terra Haven"
-        class="terra-footer-logo w-44 md:w-52 h-auto object-contain"
+        class="terra-footer-logo h-auto object-contain"
     >
 
 </div>

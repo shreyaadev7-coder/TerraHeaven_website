@@ -39,7 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             direction: "vertical",
             gestureDirection: "vertical",
-            smooth: true
+            smooth: true,
+            prevent: (node) =>
+                node instanceof Element &&
+                Boolean(node.closest("#horizontal-scroll"))
         });
 
         if (typeof ScrollTrigger !== "undefined") {
@@ -180,17 +183,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-         * Tell Lenis that this section handles its
-         * own scrolling interaction.
-         */
-
-        horizontalSection.setAttribute(
-            "data-lenis-prevent",
-            ""
-        );
-
-
-        /*
          * Calculate available horizontal distance.
          */
 
@@ -227,6 +219,40 @@ document.addEventListener("DOMContentLoaded", () => {
             horizontalTrack.style.transform =
                 `translate3d(${-currentX}px, 0, 0)`;
         }
+
+
+        const customizationCard =
+            document.getElementById("make-it-yours");
+
+        const customizeButton =
+            document.getElementById("customize-button");
+
+
+        window.focusTerraCustomization = () => {
+
+            if (!customizationCard) return;
+
+            const centeredPosition =
+                customizationCard.offsetLeft -
+                (horizontalSection.clientWidth -
+                    customizationCard.offsetWidth) / 2;
+
+            targetX = Math.max(
+                0,
+                Math.min(centeredPosition, maxX)
+            );
+
+            horizontalSection.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+            setTimeout(() => {
+                customizeButton?.focus({
+                    preventScroll: true
+                });
+            }, 350);
+        };
 
 
         /*
@@ -276,7 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
                  * touchpad movement.
                  */
 
-                let movement =
+                const movement =
                     Math.abs(event.deltaX) > Math.abs(event.deltaY)
                         ? event.deltaX
                         : event.deltaY;
@@ -287,15 +313,16 @@ document.addEventListener("DOMContentLoaded", () => {
                  * prevent huge jumps.
                  */
 
-                movement = Math.max(-60, Math.min(movement * 0.65, 60));
+                const clampedMovement =
+                    Math.max(-60, Math.min(movement * 0.65, 60));
 
 
                 const movingForward =
-                    movement > 0;
+                    clampedMovement > 0;
 
 
                 const movingBackward =
-                    movement < 0;
+                    clampedMovement < 0;
 
 
                 const atBeginning =
@@ -303,7 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 const atEnd =
-                    targetX >= maxX - 1;
+                    targetX >= maxX;
 
 
                 /*
@@ -324,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         Math.max(
                             0,
                             Math.min(
-                                targetX + movement,
+                                targetX + clampedMovement,
                                 maxX
                             )
                         );
@@ -332,7 +359,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             },
             {
-                passive: false
+                passive: false,
+                capture: true
             }
         );
 
@@ -492,6 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ) {
 
                     event.preventDefault();
+                    event.stopPropagation();
 
 
                     targetX =
@@ -2421,6 +2450,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
             }
         });
+
+
+    const giftingLink =
+        Array.from(document.querySelectorAll("nav a"))
+            .find(link =>
+                link.textContent
+                    .trim()
+                    .toLowerCase() === "gifting"
+            );
+
+
+    giftingLink?.addEventListener("click", event => {
+
+        if (
+            typeof window.focusTerraCustomization !==
+            "function"
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+        window.focusTerraCustomization();
+    });
 
 
     /* =====================================================
