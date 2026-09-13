@@ -1804,6 +1804,16 @@ document.addEventListener("DOMContentLoaded", () => {
             "category-product-grid"
         );
 
+    const oilVarietyEditorial =
+        document.getElementById(
+            "oil-variety-editorial"
+        );
+
+    const oilVarietyVideo =
+        oilVarietyEditorial?.querySelector(
+            "video"
+        );
+
 
     function openCategoryModal(
         category
@@ -1871,6 +1881,21 @@ document.addEventListener("DOMContentLoaded", () => {
         categoryProductGrid.innerHTML =
             "";
 
+        const isOilCategory =
+            category ===
+            "Edible Cold-Pressed Oils";
+
+        oilVarietyEditorial?.classList.toggle(
+            "hidden",
+            !isOilCategory
+        );
+
+        if (isOilCategory) {
+            oilVarietyVideo?.play().catch(() => {});
+        } else {
+            oilVarietyVideo?.pause();
+        }
+
 
         if (
             categoryProducts.length === 0
@@ -1921,6 +1946,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function closeCategoryModal() {
 
         if (!categoryModal) return;
+
+        oilVarietyVideo?.pause();
 
 
         categoryModal.classList.add(

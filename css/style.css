@@ -179,6 +179,58 @@ body {
     border: 1px solid #E8E5DF;
 }
 
+.oil-variety-editorial {
+    border-bottom: 1px solid #E8E5DF;
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    margin-bottom: 2.5rem;
+    padding: 0 0 2.5rem;
+}
+
+.oil-variety-copy {
+    align-self: center;
+}
+
+.terra-editorial-video {
+    background: #2C2B29;
+    display: block;
+    height: auto;
+    max-height: 42rem;
+    object-fit: cover;
+    width: 100%;
+}
+
+.oil-promo-section {
+    background: #E8E5DF;
+    padding: 6rem 1.5rem;
+    position: relative;
+}
+
+.oil-promo-inner {
+    align-items: center;
+    display: grid;
+    gap: clamp(2rem, 7vw, 7rem);
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    margin: 0 auto;
+    max-width: 80rem;
+}
+
+.oil-promo-video {
+    max-height: 38rem;
+}
+
+@media (max-width: 767px) {
+    .oil-variety-editorial,
+    .oil-promo-inner {
+        grid-template-columns: 1fr;
+    }
+
+    .oil-promo-section {
+        padding: 4rem 1.5rem;
+    }
+}
+
 
 /* PRODUCT DETAIL */
 
