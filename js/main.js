@@ -2541,8 +2541,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const cartForShipment = cart.map(item => ({
             id: item.product.id,
             name: item.product.name,
+            sku: item.product.sku || item.product.id,
             price: Number(item.product.price),
-            quantity: Number(item.quantity)
+            quantity: Number(item.quantity),
+            selections: item.selections || {}
         }));
 
         if (!Number.isFinite(amount) || amount <= 0) {
@@ -2626,13 +2628,16 @@ document.addEventListener("DOMContentLoaded", () => {
                             );
                         }
 
-                        const shipmentMessage =
-                            verificationData.shipment?.status ===
-                            "created"
-                                ? "Payment Successful. Shipment created."
-                                : "Payment Successful. Shipment is being prepared.";
+                        const confirmationMessage =
+                            verificationData.notification?.status ===
+                            "sent"
+                                ? "Payment Successful. Order details emailed."
+                                : "Payment Successful. Order notification is pending.";
 
-                        setCheckoutMessage(shipmentMessage);
+                        cart = [];
+                        updateCartCount();
+                        renderCart();
+                        setCheckoutMessage(confirmationMessage);
                         resetCheckoutState();
                     } catch (error) {
                         setCheckoutMessage(

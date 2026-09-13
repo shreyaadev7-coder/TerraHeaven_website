@@ -1,13 +1,8 @@
 const crypto = require("crypto");
 const Razorpay = require("razorpay");
 const {
-    authenticateShiprocket,
-    createShiprocketOrder,
-    getShipmentTracking
-} = require("../lib/shiprocket");
-const {
-    getProductShippingMetadata
-} = require("../lib/product-shipping");
+    sendOrderNotification
+} = require("../lib/order-email");
 
 function sendJson(response, statusCode, body) {
     response.status(statusCode).setHeader("Content-Type", "application/json");
@@ -29,7 +24,6 @@ function normaliseShipping(shipping) {
         "pincode",
         "country"
     ];
-
     const result = {};
 
     for (const field of fields) {
@@ -71,121 +65,20 @@ function validateCart(cart) {
         return {
             id,
             name,
+            sku: typeof item.sku === "string" ? item.sku : id,
             quantity,
-            price
+            price,
+            selections: item.selections && typeof item.selections === "object"
+                ? item.selections
+                : {}
         };
     });
 
     return items.every(Boolean) ? items : null;
 }
 
-function buildShiprocketOrder(orderId, paymentId, shipping, cart) {
-    const missingMetadata = [];
-    const orderItems = [];
-    let totalWeight = 0;
-    let length = 0;
-    let breadth = 0;
-    let height = 0;
-    let subtotal = 0;
-
-    for (const item of cart) {
-        const metadata = getProductShippingMetadata(item.id);
-
-        if (
-            !metadata ||
-            !metadata.sku ||
-            !Number.isFinite(metadata.weight) ||
-            metadata.weight <= 0 ||
-            !Number.isFinite(metadata.length) ||
-            metadata.length <= 0 ||
-            !Number.isFinite(metadata.breadth) ||
-            metadata.breadth <= 0 ||
-            !Number.isFinite(metadata.height) ||
-            metadata.height <= 0
-        ) {
-            missingMetadata.push(item.id);
-            continue;
-        }
-
-        subtotal += item.price * item.quantity;
-        totalWeight += metadata.weight * item.quantity;
-        length = Math.max(length, metadata.length);
-        breadth = Math.max(breadth, metadata.breadth);
-        height = Math.max(height, metadata.height);
-
-        orderItems.push({
-            name: item.name,
-            sku: metadata.sku,
-            units: String(item.quantity),
-            selling_price: item.price.toFixed(2),
-            discount: "0",
-            tax: "0",
-            hsn: metadata.hsn || ""
-        });
-    }
-
-    if (missingMetadata.length) {
-        return {
-            missingMetadata,
-            order: null
-        };
-    }
-
-    const orderReference =
-        `terra-${orderId}`
-            .replace(/[^a-zA-Z0-9-_]/g, "-")
-            .slice(0, 40);
-
-    const billingName = shipping.name.trim().split(/\s+/);
-    const billingCustomerName = billingName.shift();
-    const billingLastName = billingName.join(" ");
-
-    return {
-        missingMetadata: [],
-        order: {
-            order_id: orderReference,
-            order_date: new Date().toISOString().slice(0, 16).replace("T", " "),
-            pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION,
-            comment: "Razorpay payment verified",
-            billing_customer_name: billingCustomerName,
-            billing_last_name: billingLastName,
-            billing_address: shipping.address,
-            billing_address_2: "",
-            billing_city: shipping.city,
-            billing_pincode: shipping.pincode,
-            billing_state: shipping.state,
-            billing_country: shipping.country,
-            billing_email: shipping.email,
-            billing_phone: shipping.phone,
-            billing_alternate_phone: "",
-            shipping_is_billing: true,
-            shipping_customer_name: shipping.name,
-            shipping_last_name: billingLastName,
-            shipping_address: shipping.address,
-            shipping_address_2: "",
-            shipping_city: shipping.city,
-            shipping_pincode: shipping.pincode,
-            shipping_country: shipping.country,
-            shipping_state: shipping.state,
-            shipping_email: shipping.email,
-            shipping_phone: shipping.phone,
-            order_items: orderItems,
-            payment_method: "Prepaid",
-            shipping_charges: "0",
-            giftwrap_charges: "0",
-            transaction_charges: "0",
-            total_discount: "0",
-            sub_total: subtotal.toFixed(2),
-            length: String(length),
-            breadth: String(breadth),
-            height: String(height),
-            weight: totalWeight.toFixed(3),
-            ewaybill_no: "",
-            customer_gstin: "",
-            invoice_number: orderReference,
-            order_type: "ESSENTIALS"
-        }
-    };
+function getOrderDate() {
+    return new Date().toISOString();
 }
 
 module.exports = async function verifyPayment(request, response) {
@@ -236,10 +129,8 @@ module.exports = async function verifyPayment(request, response) {
         .createHmac("sha256", keySecret)
         .update(`${orderId}|${paymentId}`)
         .digest("hex");
-
     const expectedBuffer = Buffer.from(expectedSignature, "utf8");
     const receivedBuffer = Buffer.from(signature, "utf8");
-
     const isValid =
         expectedBuffer.length === receivedBuffer.length &&
         crypto.timingSafeEqual(expectedBuffer, receivedBuffer);
@@ -263,7 +154,6 @@ module.exports = async function verifyPayment(request, response) {
         key_id: keyId,
         key_secret: keySecret
     });
-
     let razorpayOrder;
 
     try {
@@ -276,8 +166,7 @@ module.exports = async function verifyPayment(request, response) {
 
     const cartTotalInPaise = Math.round(
         validatedCart.reduce(
-            (total, item) =>
-                total + item.price * item.quantity,
+            (total, item) => total + item.price * item.quantity,
             0
         ) * 100
     );
@@ -288,78 +177,41 @@ module.exports = async function verifyPayment(request, response) {
         });
     }
 
-    if (!process.env.SHIPROCKET_PICKUP_LOCATION) {
-        return sendJson(response, 200, {
-            success: true,
-            payment_verified: true,
-            shipment: {
-                status: "pending_configuration",
-                message: "Payment verified; Shiprocket pickup location is not configured"
-            }
-        });
-    }
-
-    const shipmentOrder = buildShiprocketOrder(
-        orderId,
-        paymentId,
-        normalisedShipping,
-        validatedCart
-    );
-
-    if (shipmentOrder.missingMetadata.length) {
-        return sendJson(response, 200, {
-            success: true,
-            payment_verified: true,
-            shipment: {
-                status: "pending_configuration",
-                message: "Payment verified; product shipping metadata is incomplete",
-                missing_products: shipmentOrder.missingMetadata
-            }
-        });
-    }
+    const orderIdForEmail = `terra-${orderId}`
+        .replace(/[^a-zA-Z0-9-_]/g, "-")
+        .slice(0, 40);
+    const emailOrder = {
+        orderId: orderIdForEmail,
+        razorpayOrderId: orderId,
+        razorpayPaymentId: paymentId,
+        paymentStatus: "Paid",
+        orderDate: getOrderDate(),
+        shipping: normalisedShipping,
+        items: validatedCart,
+        shippingChargeInPaise: 0,
+        razorpayAmountInPaise: razorpayOrder.amount
+    };
 
     try {
-        const token = await authenticateShiprocket();
-        const createdOrder = await createShiprocketOrder(
-            shipmentOrder.order,
-            token
-        );
-        const shipmentId = createdOrder.shipment_id;
-        let tracking = null;
-
-        if (shipmentId) {
-            try {
-                tracking = await getShipmentTracking(
-                    shipmentId,
-                    token
-                );
-            } catch (error) {
-                tracking = {
-                    status: "pending"
-                };
-            }
-        }
+        const email = await sendOrderNotification(emailOrder);
 
         return sendJson(response, 200, {
             success: true,
             payment_verified: true,
-            shipment: {
-                status: "created",
-                order_id: createdOrder.order_id || shipmentOrder.order.order_id,
-                shipment_id: shipmentId || null,
-                tracking
+            notification: {
+                status: "sent",
+                id: email && email.id ? email.id : null
             }
         });
     } catch (error) {
         return sendJson(response, 200, {
             success: true,
             payment_verified: true,
-            shipment: {
+            notification: {
                 status: "pending",
-                message: "Payment verified; shipment creation will be retried",
+                message: "Payment verified, but the order notification could not be sent",
                 recoverable: true
             }
         });
     }
-
 };
