@@ -584,8 +584,8 @@ body {
 
 .terra-loader-logo {
     display: block;
-    width: clamp(14rem, 30vw, 22rem);
-    max-width: 90vw;
+    width: clamp(12rem, 22vw, 18rem);
+    max-width: 85vw;
     height: auto;
     object-fit: contain;
 }
@@ -611,6 +611,10 @@ body {
     opacity: 0.9;
 }
 
+.terra-navbar-right {
+    margin-left: auto;
+}
+
 .terra-navbar-logo img {
     display: block;
     height: auto;
@@ -618,8 +622,8 @@ body {
 }
 
 .terra-navbar-logo-img {
-    width: clamp(8.5rem, 16vw, 13rem);
-    max-width: 30vw;
+    width: clamp(9rem, 12vw, 11rem);
+    max-width: 28vw;
     height: auto;
     display: block;
 }
@@ -629,8 +633,8 @@ body {
 
 .terra-footer-logo {
     display: block;
-    width: clamp(14rem, 24vw, 20rem);
-    max-width: 90vw;
+    width: clamp(12rem, 20vw, 16rem);
+    max-width: 85vw;
     height: auto;
     object-fit: contain;
 }
@@ -641,18 +645,18 @@ body {
 @media (max-width: 640px) {
 
     .terra-loader-logo {
-        width: min(16rem, 75vw);
+        width: min(13rem, 70vw);
     }
 
     .terra-footer-logo {
-        width: min(16rem, 75vw);
+        width: min(13rem, 70vw);
     }
 }
 
 @media (max-width: 767px) {
 
     .terra-navbar-logo-img {
-        width: min(10rem, 42vw);
-        max-width: 42vw;
+        width: min(8rem, 36vw);
+        max-width: 36vw;
     }
 }
