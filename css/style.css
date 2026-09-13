@@ -29,7 +29,6 @@ body {
     max-width: 100%;
     overflow: hidden;
     overscroll-behavior-x: contain;
-    overscroll-behavior-y: auto;
     touch-action: pan-y;
 }
 

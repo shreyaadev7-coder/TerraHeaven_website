@@ -39,10 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             direction: "vertical",
             gestureDirection: "vertical",
-            smooth: true,
-            prevent: (node) =>
-                node instanceof Element &&
-                Boolean(node.closest("#horizontal-scroll"))
+            smooth: true
         });
 
         if (typeof ScrollTrigger !== "undefined") {
@@ -183,6 +180,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
+         * Tell Lenis that this section handles its
+         * own scrolling interaction.
+         */
+
+        horizontalSection.setAttribute(
+            "data-lenis-prevent",
+            ""
+        );
+
+
+        /*
          * Calculate available horizontal distance.
          */
 
@@ -302,7 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
                  * touchpad movement.
                  */
 
-                const movement =
+                let movement =
                     Math.abs(event.deltaX) > Math.abs(event.deltaY)
                         ? event.deltaX
                         : event.deltaY;
@@ -313,16 +321,15 @@ document.addEventListener("DOMContentLoaded", () => {
                  * prevent huge jumps.
                  */
 
-                const clampedMovement =
-                    Math.max(-60, Math.min(movement * 0.65, 60));
+                movement = Math.max(-60, Math.min(movement * 0.65, 60));
 
 
                 const movingForward =
-                    clampedMovement > 0;
+                    movement > 0;
 
 
                 const movingBackward =
-                    clampedMovement < 0;
+                    movement < 0;
 
 
                 const atBeginning =
@@ -330,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 const atEnd =
-                    targetX >= maxX;
+                    targetX >= maxX - 1;
 
 
                 /*
@@ -351,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         Math.max(
                             0,
                             Math.min(
-                                targetX + clampedMovement,
+                                targetX + movement,
                                 maxX
                             )
                         );
@@ -359,8 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             },
             {
-                passive: false,
-                capture: true
+                passive: false
             }
         );
 
@@ -520,7 +526,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 ) {
 
                     event.preventDefault();
-                    event.stopPropagation();
 
 
                     targetX =
@@ -2421,6 +2426,194 @@ document.addEventListener("DOMContentLoaded", () => {
             "modal-open"
         );
     }
+
+
+    /* =====================================================
+       22. RAZORPAY CHECKOUT
+       ===================================================== */
+
+    const checkoutButton =
+        document.getElementById(
+            "checkout-btn"
+        );
+
+    const checkoutMessage =
+        document.getElementById(
+            "checkout-message"
+        );
+
+    let checkoutInProgress = false;
+
+
+    function setCheckoutMessage(message, isError = false) {
+
+        if (!checkoutMessage) return;
+
+        checkoutMessage.textContent = message;
+        checkoutMessage.classList.remove("hidden", "text-clay", "text-red-600");
+        checkoutMessage.classList.add(
+            isError ? "text-red-600" : "text-clay"
+        );
+    }
+
+
+    function getCartAmountInPaise() {
+
+        const total =
+            cart.reduce(
+                (sum, item) =>
+                    sum +
+                    Number(item.product.price) *
+                    Number(item.quantity),
+                0
+            );
+
+        return Math.round(total * 100);
+    }
+
+
+    function resetCheckoutState() {
+
+        checkoutInProgress = false;
+        checkoutButton.disabled = false;
+        checkoutButton.textContent = "Proceed to Checkout";
+    }
+
+
+    async function startRazorpayCheckout() {
+
+        if (checkoutInProgress) return;
+
+        if (!cart.length) {
+            setCheckoutMessage("Your cart is empty.", true);
+            return;
+        }
+
+        if (
+            typeof window.Razorpay !==
+            "function"
+        ) {
+            setCheckoutMessage(
+                "Payment checkout is unavailable right now.",
+                true
+            );
+            return;
+        }
+
+        const amount = getCartAmountInPaise();
+
+        if (!Number.isSafeInteger(amount) || amount < 100) {
+            setCheckoutMessage(
+                "The cart total is too low to process.",
+                true
+            );
+            return;
+        }
+
+        checkoutInProgress = true;
+        checkoutButton.disabled = true;
+        checkoutButton.textContent = "Processing...";
+        setCheckoutMessage("Preparing secure payment...");
+
+        try {
+            const orderResponse = await fetch("/api/create-order", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ amount })
+            });
+
+            const orderData = await orderResponse.json();
+
+            if (!orderResponse.ok || !orderData.order_id) {
+                throw new Error(
+                    orderData.error ||
+                    "Unable to prepare payment"
+                );
+            }
+
+            const razorpay = new window.Razorpay({
+                key: orderData.key_id,
+                amount: orderData.amount,
+                currency: orderData.currency,
+                name: "Terra Haven",
+                description: "Terra Haven order",
+                order_id: orderData.order_id,
+                modal: {
+                    ondismiss: () => {
+                        if (checkoutInProgress) {
+                            setCheckoutMessage("Payment cancelled.", true);
+                            resetCheckoutState();
+                        }
+                    }
+                },
+                handler: async paymentResponse => {
+                    setCheckoutMessage("Verifying payment...");
+
+                    try {
+                        const verificationResponse = await fetch(
+                            "/api/verify-payment",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(paymentResponse)
+                            }
+                        );
+
+                        const verificationData =
+                            await verificationResponse.json();
+
+                        if (
+                            !verificationResponse.ok ||
+                            !verificationData.success
+                        ) {
+                            throw new Error(
+                                verificationData.error ||
+                                "Payment verification failed"
+                            );
+                        }
+
+                        setCheckoutMessage("Payment Successful");
+                        resetCheckoutState();
+                    } catch (error) {
+                        setCheckoutMessage(
+                            error.message ||
+                            "Payment verification failed.",
+                            true
+                        );
+                        resetCheckoutState();
+                    }
+                }
+            });
+
+            razorpay.on("payment.failed", response => {
+                setCheckoutMessage(
+                    response.error?.description ||
+                    "Payment failed. Please try again.",
+                    true
+                );
+                resetCheckoutState();
+            });
+
+            razorpay.open();
+        } catch (error) {
+            setCheckoutMessage(
+                error.message ||
+                "Unable to start payment. Please try again.",
+                true
+            );
+            resetCheckoutState();
+        }
+    }
+
+
+    checkoutButton?.addEventListener(
+        "click",
+        startRazorpayCheckout
+    );
 
 
     /* =====================================================
