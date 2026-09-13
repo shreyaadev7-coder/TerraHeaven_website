@@ -21,14 +21,30 @@ module.exports = async function createOrder(request, response) {
         }
     }
 
-    const amount = body && body.amount;
+    const rawAmount = body && body.amount;
+    const amountInRupees = Number(rawAmount);
 
     if (
-        !Number.isSafeInteger(amount) ||
-        amount < 100
+        rawAmount === undefined ||
+        rawAmount === null ||
+        rawAmount === "" ||
+        !Number.isFinite(amountInRupees) ||
+        amountInRupees <= 0
     ) {
         return sendJson(response, 400, {
-            error: "Amount must be at least 100 paise"
+            error: "Amount must be a positive rupee value"
+        });
+    }
+
+    const amountInPaise =
+        Math.round(amountInRupees * 100);
+
+    if (
+        !Number.isSafeInteger(amountInPaise) ||
+        amountInPaise < 100
+    ) {
+        return sendJson(response, 400, {
+            error: "Amount must be at least ₹1"
         });
     }
 
@@ -46,7 +62,7 @@ module.exports = async function createOrder(request, response) {
         });
 
         const order = await razorpay.orders.create({
-            amount,
+            amount: amountInPaise,
             currency: "INR",
             receipt: `terra_${Date.now()}`
         });

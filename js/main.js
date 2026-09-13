@@ -2457,7 +2457,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    function getCartAmountInPaise() {
+    function getCartAmountInRupees() {
 
         const total =
             cart.reduce(
@@ -2468,7 +2468,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 0
             );
 
-        return Math.round(total * 100);
+        return total;
     }
 
 
@@ -2519,9 +2519,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const amount = getCartAmountInPaise();
+        const amount = getCartAmountInRupees();
 
-        if (!Number.isSafeInteger(amount) || amount < 100) {
+        if (!Number.isFinite(amount) || amount <= 0) {
             setCheckoutMessage(
                 "The cart total is too low to process.",
                 true
