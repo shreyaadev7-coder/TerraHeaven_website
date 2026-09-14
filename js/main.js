@@ -2272,6 +2272,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById(
                 "cart-total"
             );
+        const cartSubtotal = document.getElementById("cart-subtotal");
+        const cartDelivery = document.getElementById("cart-delivery");
 
 
         if (
@@ -2305,15 +2307,13 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
 
-            cartTotal.textContent =
-                "₹0";
+            cartSubtotal.textContent = "₹0";
+            cartDelivery.textContent = "₹0";
+            cartTotal.textContent = "₹0";
 
 
             return;
         }
-
-
-        let total = 0;
 
 
         cartItems.innerHTML =
@@ -2324,10 +2324,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         const itemTotal =
                             item.product.price *
                             item.quantity;
-
-
-                        total +=
-                            itemTotal;
 
 
                         const selectionValues =
@@ -2411,8 +2407,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 .join("");
 
 
-        cartTotal.textContent =
-            formatPrice(total);
+        const totals = window.TERRA_ORDER_PRICING.getOrderTotals(
+            cart.map(item => ({
+                price: item.product.price,
+                quantity: item.quantity
+            }))
+        );
+        cartSubtotal.textContent = formatPrice(totals.subtotal);
+        cartDelivery.textContent = formatPrice(totals.delivery);
+        cartTotal.textContent = formatPrice(totals.total);
 
 
         document

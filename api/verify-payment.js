@@ -3,6 +3,10 @@ const Razorpay = require("razorpay");
 const {
     sendOrderNotification
 } = require("../lib/order-email");
+const {
+    PRODUCT_PRICES,
+    getOrderTotals
+} = require("../lib/order-pricing");
 
 function sendJson(response, statusCode, body) {
     response.status(statusCode).setHeader("Content-Type", "application/json");
@@ -60,7 +64,9 @@ function validateCart(cart) {
             !Number.isSafeInteger(quantity) ||
             quantity <= 0 ||
             !Number.isFinite(price) ||
-            price <= 0
+            price <= 0 ||
+            !Object.prototype.hasOwnProperty.call(PRODUCT_PRICES, id) ||
+            price !== PRODUCT_PRICES[id]
         ) {
             return null;
         }
@@ -167,12 +173,8 @@ module.exports = async function verifyPayment(request, response) {
         });
     }
 
-    const cartTotalInPaise = Math.round(
-        validatedCart.reduce(
-            (total, item) => total + item.price * item.quantity,
-            0
-        ) * 100
-    );
+    const orderTotals = getOrderTotals(validatedCart);
+    const cartTotalInPaise = Math.round(orderTotals.total * 100);
 
     if (razorpayOrder.amount !== cartTotalInPaise) {
         return sendJson(response, 400, {
@@ -191,7 +193,7 @@ module.exports = async function verifyPayment(request, response) {
         orderDate: getOrderDate(),
         shipping: normalisedShipping,
         items: validatedCart,
-        shippingChargeInPaise: 0,
+        shippingChargeInPaise: orderTotals.delivery * 100,
         razorpayAmountInPaise: razorpayOrder.amount
     };
 

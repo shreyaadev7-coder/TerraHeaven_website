@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const emptyState = document.getElementById("checkout-empty");
     const itemsElement = document.getElementById("checkout-items");
     const subtotalElement = document.getElementById("checkout-subtotal");
+    const deliveryElement = document.getElementById("checkout-delivery");
     const totalElement = document.getElementById("checkout-total");
     const payButton = document.getElementById("pay-button");
     const messageElement = document.getElementById("checkout-message");
@@ -49,9 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (field) field.value = value;
     });
 
-    function getTotal() {
-        return cart.reduce((total, item) =>
-            total + Number(item.product.price) * Number(item.quantity), 0
+    function getOrderTotals() {
+        return window.TERRA_ORDER_PRICING.getOrderTotals(
+            cart.map(item => ({
+                price: item.product.price,
+                quantity: item.quantity
+            }))
         );
     }
 
@@ -84,8 +88,10 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>`;
         }).join("");
 
-        subtotalElement.textContent = formatPrice(getTotal());
-        totalElement.textContent = formatPrice(getTotal());
+        const totals = getOrderTotals();
+        subtotalElement.textContent = formatPrice(totals.subtotal);
+        deliveryElement.textContent = formatPrice(totals.delivery);
+        totalElement.textContent = formatPrice(totals.total);
     }
 
     function setMessage(message, isError = false) {
@@ -155,8 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         localStorage.setItem(SHIPPING_STORAGE_KEY, JSON.stringify(shipping));
-        const amount = getTotal();
-        if (!Number.isFinite(amount) || amount <= 0) {
+        const totals = getOrderTotals();
+        if (!Number.isFinite(totals.total) || totals.total <= 0) {
             setMessage("The cart total is too low to process.", true);
             return;
         }
@@ -170,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const orderResponse = await fetch("/api/create-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount })
+                body: JSON.stringify({ cart: getCheckoutCart() })
             });
             const orderData = await readPaymentResponse(orderResponse);
             if (!orderResponse.ok || !orderData.order_id) {

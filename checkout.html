@@ -113,7 +113,7 @@
                 <div id="checkout-items" class="mt-5"></div>
                 <div class="border-t border-stone mt-5 pt-5 space-y-3 text-sm">
                     <div class="flex justify-between"><span>Subtotal</span><span id="checkout-subtotal"></span></div>
-                    <div class="flex justify-between text-charcoal/60"><span>Shipping</span><span id="checkout-shipping">Free</span></div>
+                    <div class="flex justify-between text-charcoal/60"><span>Delivery</span><span id="checkout-delivery"></span></div>
                     <div class="flex justify-between border-t border-stone pt-4 text-lg"><span class="font-serif">Total</span><span id="checkout-total" class="font-serif"></span></div>
                 </div>
                 <p id="checkout-message" class="hidden text-sm mt-5" role="status" aria-live="polite"></p>
@@ -122,6 +122,7 @@
             </aside>
         </div>
     </main>
+    <script src="lib/order-pricing.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="js/checkout.js"></script>
 </body>

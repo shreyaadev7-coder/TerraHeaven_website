@@ -1,4 +1,8 @@
 const Razorpay = require("razorpay");
+const {
+    PRODUCT_PRICES,
+    getOrderTotals
+} = require("../lib/order-pricing");
 
 function sendJson(response, statusCode, body) {
     response.status(statusCode).setHeader("Content-Type", "application/json");
@@ -21,20 +25,34 @@ module.exports = async function createOrder(request, response) {
         }
     }
 
-    const rawAmount = body && body.amount;
-    const amountInRupees = Number(rawAmount);
-
-    if (
-        rawAmount === undefined ||
-        rawAmount === null ||
-        rawAmount === "" ||
-        !Number.isFinite(amountInRupees) ||
-        amountInRupees <= 0
-    ) {
+    const cart = body && body.cart;
+    if (!Array.isArray(cart) || !cart.length) {
         return sendJson(response, 400, {
-            error: "Amount must be a positive rupee value"
+            error: "A non-empty cart is required"
         });
     }
+
+    const validatedCart = cart.map(item => {
+        const quantity = Number(item && item.quantity);
+        const price = Number(item && item.price);
+        const id = item && item.id;
+
+        if (
+            typeof id !== "string" ||
+            !Object.prototype.hasOwnProperty.call(PRODUCT_PRICES, id) ||
+            price !== PRODUCT_PRICES[id] ||
+            !Number.isSafeInteger(quantity) ||
+            quantity <= 0
+        ) return null;
+
+        return { price: PRODUCT_PRICES[id], quantity };
+    });
+
+    if (validatedCart.some(item => !item)) {
+        return sendJson(response, 400, { error: "Cart items are invalid" });
+    }
+
+    const amountInRupees = getOrderTotals(validatedCart).total;
 
     const amountInPaise =
         Math.round(amountInRupees * 100);

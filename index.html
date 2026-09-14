@@ -497,18 +497,19 @@
         <!-- Sticky cart summary -->
         <div class="cart-summary border-t border-stone p-6">
 
-            <div class="flex justify-between items-center mb-5">
-
-                <span class="text-xs uppercase tracking-widest">
-                    Total
-                </span>
-
-                <span
-                    id="cart-total"
-                    class="font-serif text-2xl">
-                    ₹0
-                </span>
-
+            <div class="space-y-3 text-sm mb-5">
+                <div class="flex justify-between">
+                    <span>Subtotal</span>
+                    <span id="cart-subtotal">₹0</span>
+                </div>
+                <div class="flex justify-between text-charcoal/60">
+                    <span>Delivery</span>
+                    <span id="cart-delivery">₹0</span>
+                </div>
+                <div class="flex justify-between items-center border-t border-stone pt-4">
+                    <span class="text-xs uppercase tracking-widest">Total</span>
+                    <span id="cart-total" class="font-serif text-2xl">₹0</span>
+                </div>
             </div>
 
             <p class="text-xs text-charcoal/60 mb-4">
@@ -633,6 +634,7 @@
     </footer>
 
     <!-- Scripts for Scroll Animations (GSAP + Lenis) -->
+    <script src="lib/order-pricing.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.27/bundled/lenis.min.js"></script>
