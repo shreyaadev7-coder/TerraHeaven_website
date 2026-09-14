@@ -670,33 +670,69 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         {
-            id: "single-bed-1",
+            id: "single-bedspread-1",
             category: "Bedspreads",
-            name: "Single Bed Collection",
+            name: "Single Bedspread 1",
 
-            description:
-                "A soft everyday bed layer with an understated Terra Haven finish.",
+            description: "A soft everyday bedspread with an understated Terra Haven finish.",
 
-            images: [
-                "assets/images/Bedspreads/Single Bed Collection/Single BS1.png",
-                "assets/images/Bedspreads/Single Bed Collection/Single BS2.png",
-                "assets/images/Bedspreads/Single Bed Collection/Single BS3.png",
-                "assets/images/Bedspreads/Single Bed Collection/Single BS4.png",
-                "assets/images/Bedspreads/Single Bed Collection/Single BS5.png",
-                "assets/images/Bedspreads/Single Bed Collection/Single BS6.png",
-                "assets/images/Bedspreads/Single Bed Collection/Single BS7.png"
-            ],
-
+            images: ["assets/images/Bedspreads/Single Bedspread 1/Single BS1.png"],
             price: 499,
-
-            options: [
-                {
-                    label: "Size",
-                    values: [
-                        "Single"
-                    ]
-                }
-            ]
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+        },
+        {
+            id: "single-bedspread-2",
+            category: "Bedspreads",
+            name: "Single Bedspread 2",
+            description: "A soft everyday bedspread with an understated Terra Haven finish.",
+            images: ["assets/images/Bedspreads/Single Bedspread 2/Single BS2.png"],
+            price: 499,
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+        },
+        {
+            id: "single-bedspread-3",
+            category: "Bedspreads",
+            name: "Single Bedspread 3",
+            description: "A soft everyday bedspread with an understated Terra Haven finish.",
+            images: ["assets/images/Bedspreads/Single Bedspread 3/Single BS3.png"],
+            price: 499,
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+        },
+        {
+            id: "single-bedspread-4",
+            category: "Bedspreads",
+            name: "Single Bedspread 4",
+            description: "A soft everyday bedspread with an understated Terra Haven finish.",
+            images: ["assets/images/Bedspreads/Single Bedspread 4/Single BS4.png"],
+            price: 499,
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+        },
+        {
+            id: "single-bedspread-5",
+            category: "Bedspreads",
+            name: "Single Bedspread 5",
+            description: "A soft everyday bedspread with an understated Terra Haven finish.",
+            images: ["assets/images/Bedspreads/Single Bedspread 5/Single BS5.png"],
+            price: 499,
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+        },
+        {
+            id: "single-bedspread-6",
+            category: "Bedspreads",
+            name: "Single Bedspread 6",
+            description: "A soft everyday bedspread with an understated Terra Haven finish.",
+            images: ["assets/images/Bedspreads/Single Bedspread 6/Single BS6.png"],
+            price: 499,
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+        },
+        {
+            id: "single-bedspread-7",
+            category: "Bedspreads",
+            name: "Single Bedspread 7",
+            description: "A soft everyday bedspread with an understated Terra Haven finish.",
+            images: ["assets/images/Bedspreads/Single Bedspread 7/Single BS7.png"],
+            price: 499,
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
         },
 
 
