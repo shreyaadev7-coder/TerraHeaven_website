@@ -683,7 +683,7 @@ document.addEventListener("DOMContentLoaded", () => {
         {
             id: "single-bedspread-2",
             category: "Bedspreads",
-            name: "Starry Night Bedspread 2",
+            name: "Starry Night Bedspread",
             description: "A soft everyday bedspread with an understated Terra Haven finish.",
             images: ["assets/images/Bedspreads/Single Bedspread 2/Single BS2.png"],
             price: 499,
@@ -710,7 +710,7 @@ document.addEventListener("DOMContentLoaded", () => {
         {
             id: "single-bedspread-5",
             category: "Bedspreads",
-            name: "Cute Rabbit Bedspread 5",
+            name: "Cute Rabbit Bedspread",
             description: "A soft everyday bedspread with an understated Terra Haven finish.",
             images: ["assets/images/Bedspreads/Single Bedspread 5/Single BS5.png"],
             price: 499,
