@@ -649,9 +649,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 "A warm, timeless textile designed to bring softness and character into your bedroom.",
 
             images: [
-                "assets/images/Bed Double 1A.png",
-                "assets/images/Bed Double 1B.png",
-                "assets/images/Bed Double 1C.png"
+                "assets/images/Bedspreads/Double Bed Collection/Bed Double 1A.png",
+                "assets/images/Bedspreads/Double Bed Collection/Bed Double 1B.png",
+                "assets/images/Bedspreads/Double Bed Collection/Bed Double 1C.png"
             ],
 
             price: 1299,
@@ -678,13 +678,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 "A soft everyday bed layer with an understated Terra Haven finish.",
 
             images: [
-                "assets/images/Single BS1.png",
-                "assets/images/Single BS2.png",
-                "assets/images/Single BS3.png",
-                "assets/images/Single BS4.png",
-                "assets/images/Single BS5.png",
-                "assets/images/Single BS6.png",
-                "assets/images/Single BS7.png"
+                "assets/images/Bedspreads/Single Bed Collection/Single BS1.png",
+                "assets/images/Bedspreads/Single Bed Collection/Single BS2.png",
+                "assets/images/Bedspreads/Single Bed Collection/Single BS3.png",
+                "assets/images/Bedspreads/Single Bed Collection/Single BS4.png",
+                "assets/images/Bedspreads/Single Bed Collection/Single BS5.png",
+                "assets/images/Bedspreads/Single Bed Collection/Single BS6.png",
+                "assets/images/Bedspreads/Single Bed Collection/Single BS7.png"
             ],
 
             price: 499,
@@ -705,7 +705,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Bedspreads",
             name: "Botanical Haven Bedspread",
             description: "A softly patterned bedspread that brings natural character and everyday comfort to the bedroom.",
-            images: ["assets/images/bedspread-1.png"],
+            images: ["assets/images/Bedspreads/Botanical Haven Bedspread/bedspread-1.png"],
             price: 899,
             options: [{ label: "Size", values: ["King"] }]
         },
@@ -714,7 +714,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Bedspreads",
             name: "Warm Earth Bedspread",
             description: "A warm, versatile layer designed for relaxed bedrooms and timeless styling.",
-            images: ["assets/images/bedspread-2.png"],
+            images: ["assets/images/Bedspreads/Warm Earth Bedspread/bedspread-2.png"],
             price: 899,
             options: [{ label: "Size", values: ["King"] }]
         },
@@ -723,7 +723,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Bedspreads",
             name: "Quiet Meadow Bedspread",
             description: "A gentle textile layer with a calm finish for inviting everyday spaces.",
-            images: ["assets/images/bedspread-3.png"],
+            images: ["assets/images/Bedspreads/Quiet Meadow Bedspread/bedspread-3.png"],
             price: 949,
             options: [{ label: "Size", values: ["King"] }]
         },
@@ -732,8 +732,17 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Bedspreads",
             name: "Clay Garden Bedspread",
             description: "A characterful bedspread inspired by earthy tones and simple natural forms.",
-            images: ["assets/images/bedspread-4.png"],
+            images: ["assets/images/Bedspreads/Clay Garden Bedspread/bedspread-4.png"],
             price: 949,
+            options: [{ label: "Size", values: ["King"] }]
+        },
+        {
+            id: "bedspread-5",
+            category: "Bedspreads",
+            name: "Terra Bloom Bedspread",
+            description: "A considered floral layer designed to bring warmth and character to the bedroom.",
+            images: ["assets/images/Bedspreads/Terra Bloom Bedspread/bedspread-5.png"],
+            price: 999,
             options: [{ label: "Size", values: ["King"] }]
         },
         {
@@ -741,7 +750,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Bedspreads",
             name: "Sunwashed Linen Bedspread",
             description: "A light, easygoing bedspread made for calm rooms and unhurried mornings.",
-            images: ["assets/images/bedspread-6.png"],
+            images: ["assets/images/Bedspreads/Sunwashed Linen Bedspread/bedspread-6.png"],
             price: 999,
             options: [{ label: "Size", values: ["King"] }]
         },
@@ -750,7 +759,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Bedspreads",
             name: "Harvest Petal Bedspread",
             description: "A softly expressive textile that layers beautifully with natural bedroom accents.",
-            images: ["assets/images/bedspread-7.png"],
+            images: ["assets/images/Bedspreads/Harvest Petal Bedspread/bedspread-7.png"],
             price: 1049,
             options: [{ label: "Size", values: ["King"] }]
         },
@@ -759,7 +768,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Bedspreads",
             name: "Garden Path Bedspread",
             description: "A relaxed bed layer with an inviting pattern and a considered Terra Haven feel.",
-            images: ["assets/images/bedspread-8.png"],
+            images: ["assets/images/Bedspreads/Garden Path Bedspread/bedspread-8.png"],
             price: 1049,
             options: [{ label: "Size", values: ["King"] }]
         },
@@ -768,7 +777,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Bedspreads",
             name: "Natural Rhythm Bedspread",
             description: "A tactile, versatile textile designed to bring comfort and character to the home.",
-            images: ["assets/images/bedspread-9.png"],
+            images: ["assets/images/Bedspreads/Natural Rhythm Bedspread/bedspread-9.png"],
             price: 1099,
             options: [{ label: "Size", values: ["King"] }]
         },
@@ -777,7 +786,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Bedspreads",
             name: "Haven Petals Bedspread",
             description: "A distinctive final layer for bedrooms that feel personal, warm and lived in.",
-            images: ["assets/images/bedspread-10.png"],
+            images: ["assets/images/Bedspreads/Haven Petals Bedspread/bedspread-10.png"],
             price: 1099,
             options: [{ label: "Size", values: ["King"] }]
         },
