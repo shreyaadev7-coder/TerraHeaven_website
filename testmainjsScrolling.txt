@@ -1,0 +1,730 @@
+/* =====================================================
+   6. HORIZONTAL CATEGORY SCROLL
+   =====================================================
+
+   IMPORTANT:
+   The category section is controlled by ScrollTrigger.
+
+   Behaviour:
+   1. Normal vertical scrolling reaches the section.
+   2. The section pins exactly at the top of the viewport.
+   3. The section is fully visible and properly positioned.
+   4. Continued scrolling moves the category cards horizontally.
+   5. When the final card is reached, the section releases.
+   6. Normal vertical scrolling continues.
+
+   This replaces the old manual wheel-interception system.
+*/
+
+const horizontalSection =
+    document.getElementById("horizontal-scroll");
+
+const horizontalTrack =
+    document.getElementById("horizontal-track");
+
+if (
+    horizontalSection &&
+    horizontalTrack &&
+    typeof gsap !== "undefined" &&
+    typeof ScrollTrigger !== "undefined"
+) {
+
+    let maxX = 0;
+    let horizontalST = null;
+
+    /* -----------------------------------------------------
+       Calculate horizontal travel distance
+       ----------------------------------------------------- */
+
+    function calculateHorizontalDistance() {
+
+        maxX = Math.max(
+            0,
+            horizontalTrack.scrollWidth -
+            horizontalSection.clientWidth
+        );
+
+    }
+
+
+    /* -----------------------------------------------------
+       Create / rebuild horizontal ScrollTrigger
+       ----------------------------------------------------- */
+
+    function createHorizontalScroll() {
+
+        if (horizontalST) {
+            horizontalST.kill();
+            horizontalST = null;
+        }
+
+        gsap.killTweensOf(horizontalTrack);
+
+        gsap.set(
+            horizontalTrack,
+            {
+                x: 0
+            }
+        );
+
+        calculateHorizontalDistance();
+
+        /*
+         * Nothing to animate if the track fits inside
+         * the viewport.
+         */
+        if (maxX <= 0) {
+            return;
+        }
+
+
+        gsap.to(
+            horizontalTrack,
+            {
+
+                x: () => -maxX,
+
+                ease: "none",
+
+                scrollTrigger: {
+
+                    id: "terra-horizontal",
+
+                    trigger: horizontalSection,
+
+                    /*
+                     * CRITICAL:
+                     *
+                     * The section becomes pinned exactly when
+                     * its top reaches the top of the viewport.
+                     *
+                     * This prevents the section from first
+                     * appearing partially down the screen.
+                     */
+                    start: "top top",
+
+                    /*
+                     * Scroll distance is equal to horizontal
+                     * distance.
+                     */
+                    end: () => `+=${maxX}`,
+
+                    pin: true,
+
+                    pinSpacing: true,
+
+                    anticipatePin: 1,
+
+                    /*
+                     * Slight smoothing keeps Lenis + GSAP
+                     * feeling natural without losing the
+                     * correct position.
+                     */
+                    scrub: 0.55,
+
+                    invalidateOnRefresh: true,
+
+                    onEnter: () => {
+
+                        /*
+                         * Always begin the pinned section
+                         * at the first horizontal position.
+                         */
+                        gsap.set(
+                            horizontalTrack,
+                            {
+                                x: 0
+                            }
+                        );
+
+                    },
+
+                    onEnterBack: () => {
+
+                        /*
+                         * When returning upward, keep the
+                         * section synchronized.
+                         */
+                        gsap.set(
+                            horizontalTrack,
+                            {
+                                x: 0
+                            }
+                        );
+
+                    }
+
+                }
+
+            }
+        );
+
+
+        horizontalST =
+            ScrollTrigger.getById(
+                "terra-horizontal"
+            );
+
+    }
+
+
+    /* -----------------------------------------------------
+       Build after page/images have loaded
+       ----------------------------------------------------- */
+
+    window.addEventListener(
+        "load",
+        () => {
+
+            createHorizontalScroll();
+
+            ScrollTrigger.refresh();
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       Recalculate when category images load
+       ----------------------------------------------------- */
+
+    horizontalTrack
+        .querySelectorAll("img")
+        .forEach(
+            image => {
+
+                image.addEventListener(
+                    "load",
+                    () => {
+
+                        createHorizontalScroll();
+
+                        ScrollTrigger.refresh();
+
+                    },
+                    {
+                        once: true
+                    }
+                );
+
+            }
+        );
+
+
+    /* -----------------------------------------------------
+       Responsive rebuild
+       ----------------------------------------------------- */
+
+    let resizeTimer = null;
+
+    window.addEventListener(
+        "resize",
+        () => {
+
+            clearTimeout(resizeTimer);
+
+            resizeTimer =
+                setTimeout(
+                    () => {
+
+                        createHorizontalScroll();
+
+                        ScrollTrigger.refresh();
+
+                    },
+                    150
+                );
+
+        }
+    );
+
+
+    /* =====================================================
+       MOUSE DRAG SUPPORT
+       ===================================================== */
+
+    let dragging = false;
+
+    let dragStartX = 0;
+
+    let dragStartScroll = 0;
+
+
+    function getCurrentScroll() {
+
+        if (
+            typeof lenis !== "undefined" &&
+            lenis &&
+            typeof lenis.scroll === "number"
+        ) {
+
+            return lenis.scroll;
+
+        }
+
+        return (
+            window.scrollY ||
+            window.pageYOffset ||
+            0
+        );
+
+    }
+
+
+    function scrollImmediatelyTo(
+        value
+    ) {
+
+        if (
+            typeof lenis !== "undefined" &&
+            lenis &&
+            typeof lenis.scrollTo === "function"
+        ) {
+
+            lenis.scrollTo(
+                value,
+                {
+                    immediate: true,
+                    force: true
+                }
+            );
+
+        } else {
+
+            window.scrollTo(
+                0,
+                value
+            );
+
+        }
+
+    }
+
+
+    horizontalTrack.addEventListener(
+        "pointerdown",
+        event => {
+
+            /*
+             * Let normal touch scrolling continue.
+             */
+            if (
+                event.pointerType === "touch"
+            ) {
+                return;
+            }
+
+
+            if (!horizontalST) {
+                return;
+            }
+
+
+            const rect =
+                horizontalSection.getBoundingClientRect();
+
+
+            /*
+             * Only allow dragging while the
+             * horizontal section is actually pinned.
+             */
+            const isPinned =
+                Math.abs(rect.top) < 3 &&
+                rect.height >=
+                    window.innerHeight - 3;
+
+
+            if (!isPinned) {
+                return;
+            }
+
+
+            dragging = true;
+
+            dragStartX =
+                event.clientX;
+
+            dragStartScroll =
+                getCurrentScroll();
+
+
+            horizontalTrack.setPointerCapture?.(
+                event.pointerId
+            );
+
+
+            horizontalTrack.dataset.dragged =
+                "false";
+
+
+            document.body.style.userSelect =
+                "none";
+
+
+            horizontalTrack.style.cursor =
+                "grabbing";
+
+
+            event.preventDefault();
+
+        }
+    );
+
+
+    horizontalTrack.addEventListener(
+        "pointermove",
+        event => {
+
+            if (
+                !dragging ||
+                !horizontalST
+            ) {
+                return;
+            }
+
+
+            const distance =
+                dragStartX -
+                event.clientX;
+
+
+            if (
+                Math.abs(distance) > 5
+            ) {
+
+                horizontalTrack.dataset.dragged =
+                    "true";
+
+            }
+
+
+            const scrollDistance =
+                horizontalST.end -
+                horizontalST.start;
+
+
+            if (
+                scrollDistance <= 0 ||
+                maxX <= 0
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+             * Convert drag distance into an equivalent
+             * horizontal progress value.
+             */
+            const initialProgress =
+                (
+                    dragStartScroll -
+                    horizontalST.start
+                ) /
+                scrollDistance;
+
+
+            const initialHorizontal =
+                initialProgress *
+                maxX;
+
+
+            const desiredHorizontal =
+                Math.max(
+                    0,
+                    Math.min(
+                        maxX,
+                        initialHorizontal +
+                        distance
+                    )
+                );
+
+
+            const desiredProgress =
+                desiredHorizontal /
+                maxX;
+
+
+            const desiredScroll =
+                horizontalST.start +
+                desiredProgress *
+                scrollDistance;
+
+
+            const clampedScroll =
+                Math.max(
+                    horizontalST.start,
+                    Math.min(
+                        horizontalST.end,
+                        desiredScroll
+                    )
+                );
+
+
+            scrollImmediatelyTo(
+                clampedScroll
+            );
+
+
+            event.preventDefault();
+
+        }
+    );
+
+
+    function endHorizontalDrag(
+        event
+    ) {
+
+        if (!dragging) {
+            return;
+        }
+
+
+        dragging = false;
+
+
+        try {
+
+            if (
+                event?.pointerId !== undefined
+            ) {
+
+                horizontalTrack.releasePointerCapture?.(
+                    event.pointerId
+                );
+
+            }
+
+        } catch (error) {
+
+            /*
+             * Ignore pointer-capture cleanup errors.
+             */
+
+        }
+
+
+        document.body.style.userSelect =
+            "";
+
+
+        horizontalTrack.style.cursor =
+            "grab";
+
+    }
+
+
+    horizontalTrack.addEventListener(
+        "pointerup",
+        endHorizontalDrag
+    );
+
+
+    horizontalTrack.addEventListener(
+        "pointercancel",
+        endHorizontalDrag
+    );
+
+
+    /*
+     * Prevent a drag release from accidentally
+     * opening a category card.
+     */
+    horizontalTrack.addEventListener(
+        "click",
+        event => {
+
+            if (
+                horizontalTrack.dataset.dragged ===
+                "true"
+            ) {
+
+                horizontalTrack.dataset.dragged =
+                    "false";
+
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+            }
+
+        },
+        true
+    );
+
+
+    /* =====================================================
+       GIFTING / CUSTOMIZATION NAVIGATION
+       ===================================================== */
+
+    const customizationCard =
+        document.getElementById(
+            "make-it-yours"
+        );
+
+
+    const customizeButton =
+        document.getElementById(
+            "customize-button"
+        );
+
+
+    window.focusTerraCustomization = () => {
+
+        if (
+            !customizationCard ||
+            !horizontalST
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Determine how far horizontally the final
+         * card must move to reach the center.
+         */
+        const centeredPosition =
+            customizationCard.offsetLeft -
+            (
+                horizontalSection.clientWidth -
+                customizationCard.offsetWidth
+            ) / 2;
+
+
+        const desiredX =
+            Math.max(
+                0,
+                Math.min(
+                    centeredPosition,
+                    maxX
+                )
+            );
+
+
+        const progress =
+            maxX > 0
+                ? desiredX / maxX
+                : 0;
+
+
+        const destination =
+            horizontalST.start +
+            progress *
+            (
+                horizontalST.end -
+                horizontalST.start
+            );
+
+
+        if (
+            typeof lenis !== "undefined" &&
+            lenis &&
+            typeof lenis.scrollTo === "function"
+        ) {
+
+            lenis.scrollTo(
+                destination,
+                {
+                    duration: 1.2,
+                    force: true
+                }
+            );
+
+        } else {
+
+            window.scrollTo(
+                {
+                    top: destination,
+                    behavior: "smooth"
+                }
+            );
+
+        }
+
+
+        setTimeout(
+            () => {
+
+                customizeButton?.focus(
+                    {
+                        preventScroll: true
+                    }
+                );
+
+            },
+            1400
+        );
+
+    };
+
+
+    /* =====================================================
+       RESIZE OBSERVER
+       ===================================================== */
+
+    if (
+        typeof ResizeObserver !==
+        "undefined"
+    ) {
+
+        let observerTimer = null;
+
+
+        const resizeObserver =
+            new ResizeObserver(
+                () => {
+
+                    clearTimeout(
+                        observerTimer
+                    );
+
+
+                    observerTimer =
+                        setTimeout(
+                            () => {
+
+                                createHorizontalScroll();
+
+                                ScrollTrigger.refresh();
+
+                            },
+                            50
+                        );
+
+                }
+            );
+
+
+        resizeObserver.observe(
+            horizontalSection
+        );
+
+
+        resizeObserver.observe(
+            horizontalTrack
+        );
+
+    }
+
+
+    /* =====================================================
+       INITIAL BUILD
+       ===================================================== */
+
+    setTimeout(
+        () => {
+
+            createHorizontalScroll();
+
+            ScrollTrigger.refresh();
+
+        },
+        300
+    );
+
+}
