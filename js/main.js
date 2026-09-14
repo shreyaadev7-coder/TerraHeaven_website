@@ -707,7 +707,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A softly patterned bedspread that brings natural character and everyday comfort to the bedroom.",
             images: ["assets/images/bedspread-1.png"],
             price: 899,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["King"] }]
         },
         {
             id: "bedspread-2",
@@ -716,7 +716,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A warm, versatile layer designed for relaxed bedrooms and timeless styling.",
             images: ["assets/images/bedspread-2.png"],
             price: 899,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["King"] }]
         },
         {
             id: "bedspread-3",
@@ -725,7 +725,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A gentle textile layer with a calm finish for inviting everyday spaces.",
             images: ["assets/images/bedspread-3.png"],
             price: 949,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["King"] }]
         },
         {
             id: "bedspread-4",
@@ -734,7 +734,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A characterful bedspread inspired by earthy tones and simple natural forms.",
             images: ["assets/images/bedspread-4.png"],
             price: 949,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["King"] }]
         },
         {
             id: "bedspread-6",
@@ -743,7 +743,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A light, easygoing bedspread made for calm rooms and unhurried mornings.",
             images: ["assets/images/bedspread-6.png"],
             price: 999,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["King"] }]
         },
         {
             id: "bedspread-7",
@@ -752,7 +752,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A softly expressive textile that layers beautifully with natural bedroom accents.",
             images: ["assets/images/bedspread-7.png"],
             price: 1049,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["King"] }]
         },
         {
             id: "bedspread-8",
@@ -761,7 +761,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A relaxed bed layer with an inviting pattern and a considered Terra Haven feel.",
             images: ["assets/images/bedspread-8.png"],
             price: 1049,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["King"] }]
         },
         {
             id: "bedspread-9",
@@ -770,7 +770,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A tactile, versatile textile designed to bring comfort and character to the home.",
             images: ["assets/images/bedspread-9.png"],
             price: 1099,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["King"] }]
         },
         {
             id: "bedspread-10",
@@ -779,7 +779,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A distinctive final layer for bedrooms that feel personal, warm and lived in.",
             images: ["assets/images/bedspread-10.png"],
             price: 1099,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["King"] }]
         },
 
 
