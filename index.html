@@ -494,8 +494,8 @@
             class="flex-1 overflow-y-auto p-6">
         </div>
 
-        <!-- Bottom -->
-        <div class="border-t border-stone p-6">
+        <!-- Sticky cart summary -->
+        <div class="cart-summary border-t border-stone p-6">
 
             <div class="flex justify-between items-center mb-5">
 
@@ -511,92 +511,8 @@
 
             </div>
 
-            <form
-                id="shipping-form"
-                class="space-y-3 mb-5"
-                novalidate>
-
-                <p class="text-xs uppercase tracking-widest text-clay">
-                    Shipping Details
-                </p>
-
-                <input
-                    name="name"
-                    type="text"
-                    required
-                    autocomplete="name"
-                    placeholder="Full name"
-                    class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input
-                        name="phone"
-                        type="tel"
-                        required
-                        autocomplete="tel"
-                        placeholder="Phone number"
-                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
-
-                    <input
-                        name="email"
-                        type="email"
-                        required
-                        autocomplete="email"
-                        placeholder="Email address"
-                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
-                </div>
-
-                <textarea
-                    name="address"
-                    required
-                    autocomplete="street-address"
-                    placeholder="Shipping address"
-                    rows="2"
-                    class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay"></textarea>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input
-                        name="city"
-                        type="text"
-                        required
-                        autocomplete="address-level2"
-                        placeholder="City"
-                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
-
-                    <input
-                        name="state"
-                        type="text"
-                        required
-                        autocomplete="address-level1"
-                        placeholder="State"
-                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input
-                        name="pincode"
-                        type="text"
-                        required
-                        inputmode="numeric"
-                        autocomplete="postal-code"
-                        placeholder="PIN code"
-                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
-
-                    <input
-                        name="country"
-                        type="text"
-                        required
-                        value="India"
-                        autocomplete="country-name"
-                        class="w-full bg-transparent border-b border-stone px-2 py-2 text-sm outline-none focus:border-clay">
-                </div>
-            </form>
-
-            <p
-                id="checkout-message"
-                class="hidden text-sm mb-4"
-                role="status"
-                aria-live="polite">
+            <p class="text-xs text-charcoal/60 mb-4">
+                Shipping and payment details are collected securely at checkout.
             </p>
 
             <button
@@ -605,6 +521,12 @@
                 class="w-full bg-charcoal text-white py-4 text-xs uppercase tracking-[0.2em] hover:bg-clay transition-colors">
                 Proceed to Checkout
             </button>
+
+            <a href="#categories"
+               id="continue-shopping"
+               class="block text-center mt-4 text-xs uppercase tracking-widest text-charcoal/60 hover:text-clay transition-colors">
+                Continue Shopping
+            </a>
 
         </div>
 

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Terra Haven</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#F9F8F4',
+                        stone: '#E8E5DF',
+                        charcoal: '#2C2B29',
+                        clay: '#B5967E'
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Outfit"', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="checkout-page font-sans antialiased text-charcoal">
+    <main class="max-w-7xl mx-auto px-5 py-8 md:px-10 md:py-12">
+        <header class="flex items-center justify-between border-b border-stone pb-6">
+            <a href="index.html" class="font-serif text-2xl md:text-3xl">Terra Haven</a>
+            <a href="index.html#cart" class="text-xs uppercase tracking-widest text-charcoal/60 hover:text-clay">Back to Cart</a>
+        </header>
+
+        <div class="flex items-end justify-between gap-6 py-10">
+            <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-clay">Secure checkout</p>
+                <h1 class="font-serif text-4xl md:text-5xl mt-2">Complete your order</h1>
+            </div>
+            <p class="hidden md:block text-sm text-charcoal/60">Your cart is reserved while you check out.</p>
+        </div>
+
+        <div id="checkout-empty" class="checkout-panel hidden p-10 text-center">
+            <h2 class="font-serif text-3xl">Your cart is empty</h2>
+            <a href="index.html#categories" class="inline-block mt-6 bg-charcoal text-white px-7 py-3 text-xs uppercase tracking-widest hover:bg-clay">Continue Shopping</a>
+        </div>
+
+        <div id="checkout-content" class="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(20rem,0.8fr)]">
+            <section class="checkout-panel p-6 md:p-9" aria-labelledby="shipping-title">
+                <p class="text-xs uppercase tracking-[0.25em] text-clay">01</p>
+                <h2 id="shipping-title" class="font-serif text-3xl mt-2 mb-8">Shipping information</h2>
+                <form id="shipping-form" novalidate class="space-y-5">
+                    <div>
+                        <label for="name" class="block text-xs uppercase tracking-widest mb-2">Full Name</label>
+                        <input id="name" name="name" type="text" required autocomplete="name" class="checkout-field">
+                        <p class="checkout-error" data-error-for="name"></p>
+                    </div>
+                    <div class="grid gap-5 md:grid-cols-2">
+                        <div>
+                            <label for="email" class="block text-xs uppercase tracking-widest mb-2">Email</label>
+                            <input id="email" name="email" type="email" required autocomplete="email" class="checkout-field">
+                            <p class="checkout-error" data-error-for="email"></p>
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-xs uppercase tracking-widest mb-2">Phone</label>
+                            <input id="phone" name="phone" type="tel" required inputmode="tel" autocomplete="tel" class="checkout-field">
+                            <p class="checkout-error" data-error-for="phone"></p>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="address" class="block text-xs uppercase tracking-widest mb-2">Address</label>
+                        <textarea id="address" name="address" required autocomplete="street-address" rows="3" class="checkout-field"></textarea>
+                        <p class="checkout-error" data-error-for="address"></p>
+                    </div>
+                    <div>
+                        <label for="apartment" class="block text-xs uppercase tracking-widest mb-2">Apartment / Unit <span class="text-charcoal/40 normal-case tracking-normal">(optional)</span></label>
+                        <input id="apartment" name="apartment" type="text" autocomplete="address-line2" class="checkout-field">
+                        <p class="checkout-error" data-error-for="apartment"></p>
+                    </div>
+                    <div class="grid gap-5 md:grid-cols-2">
+                        <div>
+                            <label for="city" class="block text-xs uppercase tracking-widest mb-2">City</label>
+                            <input id="city" name="city" type="text" required autocomplete="address-level2" class="checkout-field">
+                            <p class="checkout-error" data-error-for="city"></p>
+                        </div>
+                        <div>
+                            <label for="state" class="block text-xs uppercase tracking-widest mb-2">State</label>
+                            <input id="state" name="state" type="text" required autocomplete="address-level1" class="checkout-field">
+                            <p class="checkout-error" data-error-for="state"></p>
+                        </div>
+                    </div>
+                    <div class="grid gap-5 md:grid-cols-2">
+                        <div>
+                            <label for="pincode" class="block text-xs uppercase tracking-widest mb-2">Pincode</label>
+                            <input id="pincode" name="pincode" type="text" required inputmode="numeric" autocomplete="postal-code" class="checkout-field">
+                            <p class="checkout-error" data-error-for="pincode"></p>
+                        </div>
+                        <div>
+                            <label for="country" class="block text-xs uppercase tracking-widest mb-2">Country</label>
+                            <input id="country" name="country" type="text" required value="India" autocomplete="country-name" class="checkout-field">
+                            <p class="checkout-error" data-error-for="country"></p>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <aside class="checkout-panel p-6 md:p-9 self-start lg:sticky lg:top-8" aria-labelledby="summary-title">
+                <p class="text-xs uppercase tracking-[0.25em] text-clay">02</p>
+                <h2 id="summary-title" class="font-serif text-3xl mt-2">Order summary</h2>
+                <div id="checkout-items" class="mt-5"></div>
+                <div class="border-t border-stone mt-5 pt-5 space-y-3 text-sm">
+                    <div class="flex justify-between"><span>Subtotal</span><span id="checkout-subtotal"></span></div>
+                    <div class="flex justify-between text-charcoal/60"><span>Shipping</span><span id="checkout-shipping">Free</span></div>
+                    <div class="flex justify-between border-t border-stone pt-4 text-lg"><span class="font-serif">Total</span><span id="checkout-total" class="font-serif"></span></div>
+                </div>
+                <p id="checkout-message" class="hidden text-sm mt-5" role="status" aria-live="polite"></p>
+                <button id="pay-button" type="button" class="w-full mt-6 bg-charcoal text-white py-4 text-xs uppercase tracking-[0.2em] hover:bg-clay disabled:opacity-50 disabled:cursor-wait">Pay with Razorpay</button>
+                <a href="index.html#cart" class="block text-center mt-5 text-xs uppercase tracking-widest text-charcoal/60 hover:text-clay">Back to Cart</a>
+            </aside>
+        </div>
+    </main>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="js/checkout.js"></script>
+</body>
+</html>

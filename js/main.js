@@ -1078,7 +1078,23 @@ document.addEventListener("DOMContentLoaded", () => {
        9. PRODUCT / CART STATE
        ===================================================== */
 
+    const CART_STORAGE_KEY = "terra-haven-cart";
+
     let cart = [];
+
+    try {
+        const storedCart = JSON.parse(
+            localStorage.getItem(CART_STORAGE_KEY) || "[]"
+        );
+
+        if (Array.isArray(storedCart)) {
+            cart = storedCart.filter(item =>
+                item && item.product && item.product.id && item.quantity > 0
+            );
+        }
+    } catch (error) {
+        cart = [];
+    }
 
     let currentProduct = null;
 
@@ -1099,6 +1115,14 @@ document.addEventListener("DOMContentLoaded", () => {
             Number(price).toLocaleString(
                 "en-IN"
             );
+    }
+
+
+    function saveCart() {
+        localStorage.setItem(
+            CART_STORAGE_KEY,
+            JSON.stringify(cart)
+        );
     }
 
 
@@ -2189,6 +2213,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
+        saveCart();
         updateCartCount();
 
         renderCart();
@@ -2271,6 +2296,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         Add something beautiful to your collection.
                     </p>
 
+                    <a href="#categories"
+                       class="inline-block mt-6 bg-charcoal text-white px-6 py-3 text-xs uppercase tracking-widest hover:bg-clay transition-colors">
+                        Continue Shopping
+                    </a>
+
                 </div>
             `;
 
@@ -2346,10 +2376,16 @@ document.addEventListener("DOMContentLoaded", () => {
                                     }
 
 
-                                    <p class="text-xs mt-2">
-                                        ${item.quantity} ×
-                                        ${formatPrice(item.product.price)}
-                                    </p>
+                                    <div class="flex items-center gap-3 mt-3">
+                                        <div class="quantity-control" aria-label="Quantity">
+                                            <button type="button" class="cart-quantity-button" data-index="${index}" data-change="-1" aria-label="Decrease quantity">−</button>
+                                            <span>${item.quantity}</span>
+                                            <button type="button" class="cart-quantity-button" data-index="${index}" data-change="1" aria-label="Increase quantity">+</button>
+                                        </div>
+                                        <span class="text-xs text-charcoal/60">
+                                            ${formatPrice(item.product.price)} each
+                                        </span>
+                                    </div>
 
 
                                     <p class="font-medium text-sm mt-1">
@@ -2380,6 +2416,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         document
+            .querySelectorAll(".cart-quantity-button")
+            .forEach(button => {
+                button.addEventListener("click", () => {
+                    const index = Number(button.dataset.index);
+                    const change = Number(button.dataset.change);
+                    const item = cart[index];
+
+                    if (!item) return;
+
+                    item.quantity = Math.max(0, item.quantity + change);
+
+                    if (!item.quantity) {
+                        cart.splice(index, 1);
+                    }
+
+                    saveCart();
+                    updateCartCount();
+                    renderCart();
+                });
+            });
+
+
+        document
             .querySelectorAll(
                 ".remove-cart-item"
             )
@@ -2401,6 +2460,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         );
 
 
+                        saveCart();
                         updateCartCount();
 
                         renderCart();
@@ -2455,252 +2515,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* =====================================================
-       22. RAZORPAY CHECKOUT
-       ===================================================== */
+     /* =====================================================
+         22. CHECKOUT NAVIGATION
+         ===================================================== */
 
     const checkoutButton =
         document.getElementById(
             "checkout-btn"
         );
 
-    const checkoutMessage =
-        document.getElementById(
-            "checkout-message"
-        );
-
-    const shippingForm =
-        document.getElementById(
-            "shipping-form"
-        );
-
-    let checkoutInProgress = false;
-
-
-    function setCheckoutMessage(message, isError = false) {
-
-        if (!checkoutMessage) return;
-
-        checkoutMessage.textContent = message;
-        checkoutMessage.classList.remove("hidden", "text-clay", "text-red-600");
-        checkoutMessage.classList.add(
-            isError ? "text-red-600" : "text-clay"
-        );
-    }
-
-
-    function getCartAmountInRupees() {
-
-        const total =
-            cart.reduce(
-                (sum, item) =>
-                    sum +
-                    Number(item.product.price) *
-                    Number(item.quantity),
-                0
-            );
-
-        return total;
-    }
-
-
-    function resetCheckoutState() {
-
-        checkoutInProgress = false;
-        checkoutButton.disabled = false;
-        checkoutButton.textContent = "Proceed to Checkout";
-    }
-
-
-    async function readPaymentResponse(response) {
-
-        const responseText = await response.text();
-        let data;
-
-        try {
-            data = JSON.parse(responseText);
-        } catch (error) {
-            throw new Error(
-                responseText.trim().startsWith("<")
-                    ? "Payment API returned HTML instead of JSON. Confirm this site is deployed through Vercel with the /api functions enabled."
-                    : "Payment API returned an invalid response."
-            );
-        }
-
-        return data;
-    }
-
-
-    async function startRazorpayCheckout() {
-
-        if (checkoutInProgress) return;
-
-        if (!cart.length) {
-            setCheckoutMessage("Your cart is empty.", true);
-            return;
-        }
-
-        if (!shippingForm || !shippingForm.reportValidity()) {
-            setCheckoutMessage(
-                "Please complete your shipping details.",
-                true
-            );
-            return;
-        }
-
-        if (
-            typeof window.Razorpay !==
-            "function"
-        ) {
-            setCheckoutMessage(
-                "Payment checkout is unavailable right now.",
-                true
-            );
-            return;
-        }
-
-        const amount = getCartAmountInRupees();
-
-        const shipping = Object.fromEntries(
-            new FormData(shippingForm).entries()
-        );
-
-        const cartForShipment = cart.map(item => ({
-            id: item.product.id,
-            name: item.product.name,
-            sku: item.product.sku || item.product.id,
-            price: Number(item.product.price),
-            quantity: Number(item.quantity),
-            selections: item.selections || {}
-        }));
-
-        if (!Number.isFinite(amount) || amount <= 0) {
-            setCheckoutMessage(
-                "The cart total is too low to process.",
-                true
-            );
-            return;
-        }
-
-        checkoutInProgress = true;
-        checkoutButton.disabled = true;
-        checkoutButton.textContent = "Processing...";
-        setCheckoutMessage("Preparing secure payment...");
-
-        try {
-            const orderResponse = await fetch("/api/create-order", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ amount })
-            });
-
-            const orderData =
-                await readPaymentResponse(orderResponse);
-
-            if (!orderResponse.ok || !orderData.order_id) {
-                throw new Error(
-                    orderData.error ||
-                    "Unable to prepare payment"
-                );
-            }
-
-            const razorpay = new window.Razorpay({
-                key: orderData.key_id,
-                amount: orderData.amount,
-                currency: orderData.currency,
-                name: "Terra Haven",
-                description: "Terra Haven order",
-                order_id: orderData.order_id,
-                modal: {
-                    ondismiss: () => {
-                        if (checkoutInProgress) {
-                            setCheckoutMessage("Payment cancelled.", true);
-                            resetCheckoutState();
-                        }
-                    }
-                },
-                handler: async paymentResponse => {
-                    setCheckoutMessage("Verifying payment...");
-
-                    try {
-                        const verificationResponse = await fetch(
-                            "/api/verify-payment",
-                            {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    ...paymentResponse,
-                                    shipping,
-                                    cart: cartForShipment
-                                })
-                            }
-                        );
-
-                        const verificationData =
-                            await readPaymentResponse(
-                                verificationResponse
-                            );
-
-                        if (
-                            !verificationResponse.ok ||
-                            !verificationData.success
-                        ) {
-                            throw new Error(
-                                verificationData.error ||
-                                "Payment verification failed"
-                            );
-                        }
-
-                        const confirmationMessage =
-                            verificationData.notification?.status ===
-                            "sent"
-                                ? "Payment Successful. Order details emailed."
-                                : "Payment Successful. Order notification is pending.";
-
-                        cart = [];
-                        updateCartCount();
-                        renderCart();
-                        setCheckoutMessage(confirmationMessage);
-                        resetCheckoutState();
-                    } catch (error) {
-                        setCheckoutMessage(
-                            error.message ||
-                            "Payment verification failed.",
-                            true
-                        );
-                        resetCheckoutState();
-                    }
-                }
-            });
-
-            razorpay.on("payment.failed", response => {
-                setCheckoutMessage(
-                    response.error?.description ||
-                    "Payment failed. Please try again.",
-                    true
-                );
-                resetCheckoutState();
-            });
-
-            razorpay.open();
-        } catch (error) {
-            setCheckoutMessage(
-                error.message ||
-                "Unable to start payment. Please try again.",
-                true
-            );
-            resetCheckoutState();
-        }
-    }
-
-
     checkoutButton?.addEventListener(
         "click",
-        startRazorpayCheckout
+        () => {
+            if (!cart.length) {
+                return;
+            }
+
+            saveCart();
+            window.location.href = "checkout.html";
+        }
     );
 
 
@@ -2867,6 +2700,10 @@ document.addEventListener("DOMContentLoaded", () => {
             closeCart
         );
 
+    document
+        .getElementById("continue-shopping")
+        ?.addEventListener("click", closeCart);
+
 
     /* =====================================================
     27. ESC KEY
@@ -2936,6 +2773,10 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCart();
 
     updateCartCount();
+
+    if (window.location.hash === "#cart") {
+        openCart();
+    }
 
 
     /* =====================================================

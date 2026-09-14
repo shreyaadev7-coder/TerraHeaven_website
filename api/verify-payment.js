@@ -19,6 +19,7 @@ function normaliseShipping(shipping) {
         "phone",
         "email",
         "address",
+        "apartment",
         "city",
         "state",
         "pincode",
@@ -27,10 +28,12 @@ function normaliseShipping(shipping) {
     const result = {};
 
     for (const field of fields) {
-        if (
-            typeof shipping[field] !== "string" ||
-            !shipping[field].trim()
-        ) {
+        if (field === "apartment" && shipping[field] === undefined) {
+            result[field] = "";
+            continue;
+        }
+
+        if (typeof shipping[field] !== "string" || !shipping[field].trim()) {
             return null;
         }
 
