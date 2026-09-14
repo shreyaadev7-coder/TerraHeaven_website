@@ -672,36 +672,36 @@ document.addEventListener("DOMContentLoaded", () => {
         {
             id: "single-bedspread-1",
             category: "Bedspreads",
-            name: "Single Bedspread 1",
+            name: "Winter Frost Bedspread",
 
             description: "A soft everyday bedspread with an understated Terra Haven finish.",
 
             images: ["assets/images/Bedspreads/Single Bedspread 1/Single BS1.png"],
             price: 499,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["Single"] }]
         },
         {
             id: "single-bedspread-2",
             category: "Bedspreads",
-            name: "Single Bedspread 2",
+            name: "Starry Night Bedspread 2",
             description: "A soft everyday bedspread with an understated Terra Haven finish.",
             images: ["assets/images/Bedspreads/Single Bedspread 2/Single BS2.png"],
             price: 499,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["Single"] }]
         },
         {
             id: "single-bedspread-3",
             category: "Bedspreads",
-            name: "Single Bedspread 3",
+            name: "Floral Bedspread",
             description: "A soft everyday bedspread with an understated Terra Haven finish.",
             images: ["assets/images/Bedspreads/Single Bedspread 3/Single BS3.png"],
             price: 499,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["Single"] }]
         },
         {
             id: "single-bedspread-4",
             category: "Bedspreads",
-            name: "Single Bedspread 4",
+            name: "Elephant Design Bedspread",
             description: "A soft everyday bedspread with an understated Terra Haven finish.",
             images: ["assets/images/Bedspreads/Single Bedspread 4/Single BS4.png"],
             price: 499,
@@ -710,29 +710,29 @@ document.addEventListener("DOMContentLoaded", () => {
         {
             id: "single-bedspread-5",
             category: "Bedspreads",
-            name: "Single Bedspread 5",
+            name: "Cute Rabbit Bedspread 5",
             description: "A soft everyday bedspread with an understated Terra Haven finish.",
             images: ["assets/images/Bedspreads/Single Bedspread 5/Single BS5.png"],
             price: 499,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["Single"] }]
         },
         {
             id: "single-bedspread-6",
             category: "Bedspreads",
-            name: "Single Bedspread 6",
+            name: "Polka Dot Bedspread",
             description: "A soft everyday bedspread with an understated Terra Haven finish.",
             images: ["assets/images/Bedspreads/Single Bedspread 6/Single BS6.png"],
             price: 499,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["Single"] }]
         },
         {
             id: "single-bedspread-7",
             category: "Bedspreads",
-            name: "Single Bedspread 7",
+            name: "Cherries Bedspread",
             description: "A soft everyday bedspread with an understated Terra Haven finish.",
             images: ["assets/images/Bedspreads/Single Bedspread 7/Single BS7.png"],
             price: 499,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["Single"] }]
         },
 
 
