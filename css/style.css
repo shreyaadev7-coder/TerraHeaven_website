@@ -788,8 +788,19 @@ body {
 
 @media (max-width: 767px) {
 
+    #navbar {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .terra-navbar-left,
+    .terra-navbar-right {
+        gap: 0.45rem;
+        white-space: nowrap;
+    }
+
     .terra-navbar-logo-img {
-        width: min(8rem, 36vw);
-        max-width: 36vw;
+        width: min(6rem, 24vw);
+        max-width: 24vw;
     }
 }

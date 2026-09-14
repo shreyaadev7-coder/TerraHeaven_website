@@ -370,6 +370,18 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         );
 
+        horizontalSection.setAttribute("tabindex", "0");
+        horizontalSection.addEventListener("keydown", event => {
+            if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+            event.preventDefault();
+            const step = Math.max(180, horizontalSection.clientWidth * 0.65);
+            targetX = event.key === "Home"
+                ? 0
+                : event.key === "End"
+                    ? maxX
+                    : Math.max(0, Math.min(targetX + (event.key === "ArrowRight" ? step : -step), maxX));
+        });
+
 
         /*
          * Mouse drag.
@@ -2036,6 +2048,130 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     }
 
+    const bundleModal = document.getElementById("bundle-modal");
+    const bundleOptions = document.getElementById("bundle-options");
+    const bundleItems = document.getElementById("bundle-items");
+    const inquiryForm = document.getElementById("inquiry-form");
+    const inquiryMessage = document.getElementById("inquiry-message");
+    const inquirySubmit = document.getElementById("inquiry-submit");
+    let selectedBundle = null;
+    let inquiryInProgress = false;
+
+    const bundleDefinitions = [
+        { name: "Home Comfort Set", items: [["bedspread-1", 1], ["cushion-1", 2]] },
+        { name: "Everyday Wellness Set", items: [["oil-sesame", 1], ["bag-3", 1]] },
+        { name: "Thoughtful Housewarming Set", items: [["single-bedspread-1", 1], ["tote-1", 1], ["cushion-2", 2]] },
+        { name: "Self-Care / Ritual Set", items: [["oil-coconut", 1], ["cushion-3", 1]] },
+        { name: "Seasonal Gift Set", items: [["quilt-1", 1], ["bag-3", 1]] }
+    ];
+
+    function getBundleProduct(id) {
+        return products.find(product => product.id === id);
+    }
+
+    function getBundleSelection(product) {
+        return product?.options?.length ? { 0: product.options[0].values[0] } : {};
+    }
+
+    function getBundleTotal() {
+        return (selectedBundle?.items || []).reduce((total, [id, quantity, size]) => {
+            const product = getBundleProduct(id);
+            return total + window.TERRA_ORDER_PRICING.getProductPrice(id, size ? { 0: size } : getBundleSelection(product)) * quantity;
+        }, 0);
+    }
+
+    function renderBundleItems() {
+        if (!bundleItems || !selectedBundle) return;
+        bundleItems.innerHTML = `
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-serif text-2xl">${escapeHtml(selectedBundle.name)}</h3>
+                <strong id="bundle-total">${formatPrice(getBundleTotal())}</strong>
+            </div>
+            <div class="space-y-3">
+                ${selectedBundle.items.map(([id, quantity, size], index) => {
+                    const product = getBundleProduct(id);
+                    const selection = { 0: size || getBundleSelection(product)[0] };
+                    return `<div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone pb-3">
+                        <span>${escapeHtml(product?.name || id)}</span>
+                        <div class="flex items-center gap-3 text-sm">
+                            ${product?.options?.length ? `<select data-bundle-selection="${index}" class="checkout-field py-2">${product.options[0].values.map(value => `<option value="${escapeHtml(value)}" ${selection[0] === value ? "selected" : ""}>${escapeHtml(value)}</option>`).join("")}</select>` : ""}
+                            <input data-bundle-quantity="${index}" type="number" min="1" max="20" value="${quantity}" class="checkout-field w-20 py-2">
+                        </div>
+                    </div>`;
+                }).join("")}
+            </div>`;
+
+        bundleItems.querySelectorAll("[data-bundle-quantity]").forEach(input => {
+            input.addEventListener("input", () => {
+                selectedBundle.items[Number(input.dataset.bundleQuantity)][1] = Math.max(1, Number(input.value) || 1);
+                renderBundleItems();
+            });
+        });
+        bundleItems.querySelectorAll("[data-bundle-selection]").forEach(select => {
+            select.addEventListener("change", () => {
+                selectedBundle.items[Number(select.dataset.bundleSelection)][2] = select.value;
+                renderBundleItems();
+            });
+        });
+    }
+
+    function openBundleModal() {
+        if (!bundleModal) return;
+        if (!selectedBundle) selectedBundle = { ...bundleDefinitions[0], items: bundleDefinitions[0].items.map(item => [...item]) };
+        bundleOptions.innerHTML = bundleDefinitions.map((bundle, index) => `
+            <button type="button" data-bundle-index="${index}" class="text-left border border-stone p-4 hover:border-clay">
+                <span class="font-serif text-xl">${escapeHtml(bundle.name)}</span>
+                <span class="block text-xs text-charcoal/60 mt-2">${bundle.items.map(([id]) => getBundleProduct(id)?.name).join(" + ")}</span>
+            </button>`).join("");
+        bundleOptions.querySelectorAll("[data-bundle-index]").forEach(button => button.addEventListener("click", () => {
+            const definition = bundleDefinitions[Number(button.dataset.bundleIndex)];
+            selectedBundle = { ...definition, items: definition.items.map(item => [...item]) };
+            document.getElementById("preferred-bundle").value = selectedBundle.name;
+            renderBundleItems();
+        }));
+        renderBundleItems();
+        bundleModal.classList.remove("hidden");
+        bundleModal.setAttribute("aria-hidden", "false");
+        document.body.classList.add("modal-open");
+    }
+
+    function closeBundleModal() {
+        bundleModal?.classList.add("hidden");
+        bundleModal?.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("modal-open");
+    }
+
+    inquiryForm?.addEventListener("submit", async event => {
+        event.preventDefault();
+        if (inquiryInProgress || !selectedBundle) return;
+        inquiryInProgress = true;
+        inquirySubmit.disabled = true;
+        inquiryMessage.className = "text-sm md:col-span-2 text-clay";
+        inquiryMessage.textContent = "Sending your inquiry...";
+        const formData = Object.fromEntries(new FormData(inquiryForm).entries());
+        formData.bundle = selectedBundle.name;
+        formData.bundleTotal = getBundleTotal();
+        formData.items = selectedBundle.items.map(([id, quantity, size]) => ({
+            id,
+            name: getBundleProduct(id)?.name || id,
+            quantity,
+            selections: { 0: size || getBundleSelection(getBundleProduct(id))[0] }
+        }));
+        try {
+            const response = await fetch("/api/send-inquiry", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(formData) });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "Unable to send inquiry");
+            inquiryMessage.textContent = "Thank you. Your inquiry has been sent.";
+            inquiryForm.reset();
+        } catch (error) {
+            inquiryMessage.className = "text-sm md:col-span-2 text-red-600";
+            inquiryMessage.textContent = error.message;
+        } finally {
+            inquiryInProgress = false;
+            inquirySubmit.disabled = false;
+        }
+    });
+
 
     /* =====================================================
        16. CATEGORY CARD CONNECTION
@@ -2061,35 +2197,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 title.textContent.trim();
 
 
-            /*
-             * Don't open the product collection
-             * for Make It Yours yet.
-             */
-
-            if (
-                categoryName ===
-                "Make It Yours"
-            ) {
-                return;
-            }
-
-
-            let mappedCategory =
-                categoryName;
-
-
-            /*
-             * Match the product database exactly.
-             */
-
-            if (
-                categoryName ===
-                "Edible Cold-pressed Oils"
-            ) {
-
-                mappedCategory =
-                    "Edible Cold-Pressed Oils";
-            }
+            const mappedCategory = (card.dataset.collection || categoryName) === "Bags"
+                ? "Lifestyle Bags"
+                : card.dataset.collection || categoryName;
 
 
             card.addEventListener(
@@ -2108,12 +2218,13 @@ document.addEventListener("DOMContentLoaded", () => {
                      * accidentally opening category.
                      */
 
-                    if (
-                        event.target.closest(
-                            "button"
-                        )
-                    ) {
+                    if (event.target.closest("button")) {
 
+                        return;
+                    }
+
+                    if (card.dataset.bundleTrigger === "true") {
+                        openBundleModal();
                         return;
                     }
 
@@ -2123,6 +2234,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
                 }
             );
+
+            card.addEventListener("keydown", event => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                card.click();
+            });
         }
     );
 
@@ -2739,6 +2856,40 @@ document.addEventListener("DOMContentLoaded", () => {
             closeCategoryModal
         );
 
+    document.getElementById("bundle-modal-close")?.addEventListener("click", closeBundleModal);
+    document.getElementById("bundle-modal-overlay")?.addEventListener("click", closeBundleModal);
+    document.getElementById("customize-button")?.addEventListener("click", openBundleModal);
+
+    const newsletterForm = document.getElementById("newsletter-form");
+    const newsletterMessage = document.getElementById("newsletter-message");
+    const newsletterSubmit = document.getElementById("newsletter-submit");
+    let newsletterInProgress = false;
+
+    newsletterForm?.addEventListener("submit", async event => {
+        event.preventDefault();
+        if (newsletterInProgress) return;
+        newsletterInProgress = true;
+        newsletterSubmit.disabled = true;
+        newsletterMessage.textContent = "Joining...";
+        const email = new FormData(newsletterForm).get("email");
+        try {
+            const response = await fetch("/api/newsletter-signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "Unable to join");
+            newsletterMessage.textContent = "Thank you for joining Terra Haven.";
+            newsletterForm.reset();
+        } catch (error) {
+            newsletterMessage.textContent = error.message;
+        } finally {
+            newsletterInProgress = false;
+            newsletterSubmit.disabled = false;
+        }
+    });
+
 
     /* =====================================================
     26. CLOSE CART
@@ -2787,6 +2938,8 @@ document.addEventListener("DOMContentLoaded", () => {
             closeProductModal();
 
             closeCategoryModal();
+
+            closeBundleModal();
 
             closeCart();
         }
