@@ -705,7 +705,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A soft everyday bedspread with an understated Terra Haven finish.",
             images: ["assets/images/Bedspreads/Single Bedspread 4/Single BS4.png"],
             price: 499,
-            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
+            options: [{ label: "Size", values: ["Single"] }]
         },
         {
             id: "single-bedspread-5",
