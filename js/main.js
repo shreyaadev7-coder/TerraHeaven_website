@@ -1719,6 +1719,8 @@ document.addEventListener("DOMContentLoaded", () => {
                                 "selected"
                             );
 
+                        renderProductModal();
+
                     }
                 );
 
