@@ -5,6 +5,7 @@ const {
 } = require("../lib/order-email");
 const {
     PRODUCT_PRICES,
+    getProductPrice,
     getOrderTotals
 } = require("../lib/order-pricing");
 
@@ -57,6 +58,7 @@ function validateCart(cart) {
         const price = Number(item && item.price);
         const id = item && item.id;
         const name = item && item.name;
+        const selections = item && item.selections;
 
         if (
             typeof id !== "string" ||
@@ -66,7 +68,8 @@ function validateCart(cart) {
             !Number.isFinite(price) ||
             price <= 0 ||
             !Object.prototype.hasOwnProperty.call(PRODUCT_PRICES, id) ||
-            price !== PRODUCT_PRICES[id]
+            !selections || typeof selections !== "object" ||
+            price !== getProductPrice(id, selections)
         ) {
             return null;
         }
@@ -77,9 +80,7 @@ function validateCart(cart) {
             sku: typeof item.sku === "string" ? item.sku : id,
             quantity,
             price,
-            selections: item.selections && typeof item.selections === "object"
-                ? item.selections
-                : {}
+            selections
         };
     });
 

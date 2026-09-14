@@ -53,9 +53,18 @@ document.addEventListener("DOMContentLoaded", () => {
     function getOrderTotals() {
         return window.TERRA_ORDER_PRICING.getOrderTotals(
             cart.map(item => ({
-                price: item.product.price,
-                quantity: item.quantity
+                id: item.product.id,
+                price: getCartItemPrice(item),
+                quantity: item.quantity,
+                selections: item.selections || {}
             }))
+        );
+    }
+
+    function getCartItemPrice(item) {
+        return window.TERRA_ORDER_PRICING.getProductPrice(
+            item.product.id,
+            item.selections || {}
         );
     }
 
@@ -64,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
             id: item.product.id,
             name: item.product.name,
             sku: item.product.sku || item.product.id,
-            price: Number(item.product.price),
+            price: getCartItemPrice(item),
             quantity: Number(item.quantity),
             selections: item.selections || {}
         }));

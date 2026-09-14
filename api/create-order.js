@@ -1,6 +1,7 @@
 const Razorpay = require("razorpay");
 const {
     PRODUCT_PRICES,
+    getProductPrice,
     getOrderTotals
 } = require("../lib/order-pricing");
 
@@ -36,16 +37,18 @@ module.exports = async function createOrder(request, response) {
         const quantity = Number(item && item.quantity);
         const price = Number(item && item.price);
         const id = item && item.id;
+        const selections = item && item.selections;
 
         if (
             typeof id !== "string" ||
             !Object.prototype.hasOwnProperty.call(PRODUCT_PRICES, id) ||
-            price !== PRODUCT_PRICES[id] ||
+            !selections || typeof selections !== "object" ||
+            price !== getProductPrice(id, selections) ||
             !Number.isSafeInteger(quantity) ||
             quantity <= 0
         ) return null;
 
-        return { price: PRODUCT_PRICES[id], quantity };
+        return { id, price, quantity, selections };
     });
 
     if (validatedCart.some(item => !item)) {

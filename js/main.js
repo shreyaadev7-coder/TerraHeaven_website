@@ -707,7 +707,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A softly patterned bedspread that brings natural character and everyday comfort to the bedroom.",
             images: ["assets/images/bedspread-1.png"],
             price: 899,
-            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
         },
         {
             id: "bedspread-2",
@@ -716,7 +716,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A warm, versatile layer designed for relaxed bedrooms and timeless styling.",
             images: ["assets/images/bedspread-2.png"],
             price: 899,
-            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
         },
         {
             id: "bedspread-3",
@@ -725,7 +725,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A gentle textile layer with a calm finish for inviting everyday spaces.",
             images: ["assets/images/bedspread-3.png"],
             price: 949,
-            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
         },
         {
             id: "bedspread-4",
@@ -734,7 +734,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A characterful bedspread inspired by earthy tones and simple natural forms.",
             images: ["assets/images/bedspread-4.png"],
             price: 949,
-            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
         },
         {
             id: "bedspread-6",
@@ -743,7 +743,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A light, easygoing bedspread made for calm rooms and unhurried mornings.",
             images: ["assets/images/bedspread-6.png"],
             price: 999,
-            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
         },
         {
             id: "bedspread-7",
@@ -752,7 +752,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A softly expressive textile that layers beautifully with natural bedroom accents.",
             images: ["assets/images/bedspread-7.png"],
             price: 1049,
-            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
         },
         {
             id: "bedspread-8",
@@ -761,7 +761,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A relaxed bed layer with an inviting pattern and a considered Terra Haven feel.",
             images: ["assets/images/bedspread-8.png"],
             price: 1049,
-            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
         },
         {
             id: "bedspread-9",
@@ -770,7 +770,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A tactile, versatile textile designed to bring comfort and character to the home.",
             images: ["assets/images/bedspread-9.png"],
             price: 1099,
-            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
         },
         {
             id: "bedspread-10",
@@ -779,7 +779,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description: "A distinctive final layer for bedrooms that feel personal, warm and lived in.",
             images: ["assets/images/bedspread-10.png"],
             price: 1099,
-            options: [{ label: "Size", values: ["Single", "Double", "King"] }]
+            options: [{ label: "Size", values: ["Single", "Queen", "King"] }]
         },
 
 
@@ -1357,6 +1357,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const product =
             currentProduct;
 
+        const selectedPrice = window.TERRA_ORDER_PRICING.getProductPrice(
+            product.id,
+            currentSelections
+        );
+
 
         const image =
             product.images[
@@ -1457,7 +1462,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 <div class="mt-5 text-2xl font-medium text-charcoal">
-                    ${formatPrice(product.price)}
+                    ${formatPrice(selectedPrice)}
                 </div>
 
 
@@ -1553,7 +1558,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     id="modal-add-to-cart"
                     class="w-full mt-8 bg-charcoal text-white py-4 text-xs uppercase tracking-[0.2em] hover:bg-clay transition-colors">
 
-                    Add to Cart — ${formatPrice(product.price)}
+                    Add to Cart — ${formatPrice(selectedPrice)}
 
                 </button>
 
@@ -2219,6 +2224,13 @@ document.addEventListener("DOMContentLoaded", () => {
         renderCart();
     }
 
+    function getCartItemPrice(item) {
+        return window.TERRA_ORDER_PRICING.getProductPrice(
+            item.product.id,
+            item.selections || {}
+        );
+    }
+
 
     /* =====================================================
        19. CART COUNT
@@ -2321,9 +2333,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 .map(
                     (item, index) => {
 
-                        const itemTotal =
-                            item.product.price *
-                            item.quantity;
+                        const itemPrice = getCartItemPrice(item);
+                        const itemTotal = itemPrice * item.quantity;
 
 
                         const selectionValues =
@@ -2379,7 +2390,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                             <button type="button" class="cart-quantity-button" data-index="${index}" data-change="1" aria-label="Increase quantity">+</button>
                                         </div>
                                         <span class="text-xs text-charcoal/60">
-                                            ${formatPrice(item.product.price)} each
+                                            ${formatPrice(itemPrice)} each
                                         </span>
                                     </div>
 
@@ -2409,8 +2420,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const totals = window.TERRA_ORDER_PRICING.getOrderTotals(
             cart.map(item => ({
-                price: item.product.price,
-                quantity: item.quantity
+                id: item.product.id,
+                price: getCartItemPrice(item),
+                quantity: item.quantity,
+                selections: item.selections || {}
             }))
         );
         cartSubtotal.textContent = formatPrice(totals.subtotal);
